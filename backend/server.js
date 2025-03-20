@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
+import examinerRouter from './routes/examiner.routes.js';
+
 dotenv.config();
 
 const app = express();
@@ -23,6 +25,8 @@ const connection = mongoose.connection;
 connection.once('open', () => {
   console.log('MongoDB database connection established successfully');
 });
+
+app.use('/examiner', examinerRouter);
 
 app.listen(PORT, () => {
     console.log(`Appis running on port ${PORT}`);
