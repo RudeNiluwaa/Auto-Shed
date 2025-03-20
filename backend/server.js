@@ -12,3 +12,17 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 8070;
+
+mongoose.connect(process.env.MONGODB_URI, {
+  
+});
+
+const connection = mongoose.connection;
+
+connection.once('open', () => {
+  console.log('MongoDB database connection established successfully');
+});
+
+app.listen(PORT, () => {
+    console.log(`Appis running on port ${PORT}`);
+});
