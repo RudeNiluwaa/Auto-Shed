@@ -4,13 +4,14 @@ const router = Router();
 
 router.route('/create').post(async (req, res) => {
 
-    const {examinerName,  examinerId,  moduleCode,  availability} = req.body;
+    const {examinerName,  examinerId,  moduleCode,  availability, date} = req.body;
 
     const newExaminer = new Examiner({
         examinerName,
         examinerId,
         moduleCode,
-        availability
+        availability,
+        date
     });
 
     await newExaminer.save().then(() => {
@@ -28,13 +29,14 @@ router.route('/').get(async (req, res) => {
 router.route('/update/:id').put(async (req, res) => {
 
     let id = req.params.id;
-    const {examinerName,  examinerId,  moduleCode,  availability} = req.body;
+    const {examinerName,  examinerId,  moduleCode,  availability, date} = req.body;
     
     const updateExaminer =({
         examinerName,
         examinerId,
         moduleCode,
-        availability
+        availability,
+        date
     });
 
 
