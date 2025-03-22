@@ -2,7 +2,7 @@ import React from 'react';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './App.css';
 import AddExaminer from './Componenets/AddExaminer';
-import GetExaminer from './Componenets/GetExaminer';
+import GetExaminers from './Componenets/GetExaminers';
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
     
     <Routes>
       <Route path='/add' element={<AddExaminer />} />
-      <Route path='/' element={<GetExaminer />} />
+      <Route path='/get' element={<GetExaminers />} />
     </Routes>
     </BrowserRouter>
      
