@@ -1,11 +1,20 @@
 import React from 'react';
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './App.css';
+import AddExaminer from './Componenets/AddExaminer';
+import GetExaminer from './Componenets/GetExaminer';
 
 function App() {
   return (
-    <div className="App">
-      
-    </div>
+
+    <BrowserRouter>
+    
+    <Routes>
+      <Route path='/add' element={<AddExaminer />} />
+      <Route path='/' element={<GetExaminer />} />
+    </Routes>
+    </BrowserRouter>
+     
   );
 }
 
