@@ -10,8 +10,8 @@ function App() {
     <BrowserRouter>
     
     <Routes>
-      <Route path='/add' element={<AddExaminer />} />
-      <Route path='/get' element={<GetExaminers />} />
+      <Route path='/add-examiner' element={<AddExaminer />} />
+      <Route path='/get-examiner' element={<GetExaminers />} />
     </Routes>
     </BrowserRouter>
      
