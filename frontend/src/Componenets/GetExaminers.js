@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function ExaminerList() {
@@ -12,19 +13,21 @@ export default function ExaminerList() {
     date: ''
   });
 
+  const navigate = useNavigate();
+
   // Fetch examiners data from the backend
   useEffect(() => {
     axios.get('http://localhost:8070/examiner/')
       .then(response => {
-        setExaminers(response.data); // Assuming the response is an array of examiners
+        setExaminers(response.data);  
       })
       .catch(error => {
         console.error("There was an error fetching the examiners data:", error);
       });
-  }, []); // The empty array ensures this effect runs only once when the component mounts
+  }, []);  
 
-  const handleDelete = (examinerId, mongoId) => { // Pass _id from the database
-    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`) // Use _id
+  const handleDelete = (examinerId, mongoId) => {  
+    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)  
       .then(() => {
         setExaminers(examiners.filter(examiner => examiner._id !== mongoId));
         alert('Examiner deleted successfully');
@@ -34,20 +37,16 @@ export default function ExaminerList() {
         alert('Failed to delete examiner');
       });
   };
-  
-  
-  
-  
 
   const handleUpdate = (examinerId) => {
     const examiner = examiners.find(examiner => examiner.examinerId === examinerId);
     setCurrentExaminer(examiner);
     setIsEditing(true);
   };
-  
+
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    // Use MongoDB _id for the update URL
+    
     axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer)
       .then(response => {
         const updatedExaminers = examiners.map(examiner =>
@@ -62,17 +61,28 @@ export default function ExaminerList() {
         alert('Failed to update examiner');
       });
   };
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCurrentExaminer({ ...currentExaminer, [name]: value });
   };
 
+  
+  const handleAddExaminer = () => {
+    navigate('/add'); 
+  };
+
   return (
     <div>
       <h2 style={{ textAlign: "center", color: "#333" }}>Examiners List</h2>
-      
+
+      {/* Add Examiner Button */}
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <button onClick={handleAddExaminer} style={buttonStyle}>
+          Add Examiner
+        </button>
+      </div>
+
       {/* Table to display examiners */}
       <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
         <thead>
@@ -96,7 +106,6 @@ export default function ExaminerList() {
               <td style={tableCellStyle}>
                 <button onClick={() => handleUpdate(examiner.examinerId)} style={buttonStyle}>Update</button>
                 <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} style={buttonStyle}>Delete</button>
-
               </td>
             </tr>
           ))}
@@ -208,6 +217,7 @@ const cancelButtonStyle = {
   borderRadius: "4px",
   cursor: "pointer",
 };
+
 
 
 
