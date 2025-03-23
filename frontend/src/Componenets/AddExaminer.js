@@ -51,6 +51,10 @@ export default function AddExaminer() {
     });
   };
 
+  const handleMoreInfoClick = () => {
+    navigate("/get");  // Navigate to GetExaminers.js
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <form onSubmit={handleSubmit} className="w-full max-w-md p-6 bg-white shadow-md rounded-lg border border-gray-300">
@@ -114,10 +118,19 @@ export default function AddExaminer() {
         <button type="submit" className="w-full p-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
           Submit
         </button>
+
+        <button
+          type="button"
+          onClick={handleMoreInfoClick}
+          className="w-full p-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
+        >
+          More Info
+        </button>
       </form>
     </div>
   );
 }
+
 
 
 
