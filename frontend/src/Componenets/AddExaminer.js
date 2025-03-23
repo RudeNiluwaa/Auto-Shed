@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 export default function AddExaminer() {
@@ -7,6 +8,8 @@ export default function AddExaminer() {
   const [moduleCode, setCode] = useState("");
   const [availability, setAvailability] = useState("");
   const [date, setDate] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,7 +30,8 @@ export default function AddExaminer() {
        setCode("");
        setAvailability("");
        setDate("");
-
+       
+       navigate("/get"); 
 
     })
     .catch(err => {
@@ -84,7 +88,7 @@ export default function AddExaminer() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} style={formStyle} onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={formStyle} >
         <h2 style={{ textAlign: "center", color: "#333" }}>Add Examiner</h2>
 
         <label htmlFor="examinerName">Examiner Name:</label>
