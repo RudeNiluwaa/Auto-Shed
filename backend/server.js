@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-
 import examinerRouter from './routes/examiner.routes.js';
 import rescheduleRouter from './routes/reschedule.routes.js';
+import presentationRouter from './routes/presentation.routes.js';
 
 dotenv.config();
 
@@ -29,6 +29,7 @@ connection.once('open', () => {
 
 app.use('/examiner', examinerRouter);
 app.use('/reschedule', rescheduleRouter);
+app.use('/presentation', presentationRouter);
 
 app.listen(PORT, () => {
     console.log(`Appis running on port ${PORT}`);
