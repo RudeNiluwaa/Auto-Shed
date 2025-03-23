@@ -23,11 +23,10 @@ export default function ExaminerList() {
       });
   }, []); // The empty array ensures this effect runs only once when the component mounts
 
-  const handleDelete = (examinerId) => {
-    axios.delete("http://localhost:8070/examiner/delete/id")
+  const handleDelete = (examinerId, mongoId) => { // Pass _id from the database
+    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`) // Use _id
       .then(() => {
-        // Remove the deleted examiner from the state
-        setExaminers(examiners.filter(examiner => examiner.examinerId !== examinerId));
+        setExaminers(examiners.filter(examiner => examiner._id !== mongoId));
         alert('Examiner deleted successfully');
       })
       .catch(error => {
@@ -35,6 +34,10 @@ export default function ExaminerList() {
         alert('Failed to delete examiner');
       });
   };
+  
+  
+  
+  
 
   const handleUpdate = (examinerId) => {
     const examiner = examiners.find(examiner => examiner.examinerId === examinerId);
@@ -92,7 +95,8 @@ export default function ExaminerList() {
               <td style={tableCellStyle}>{examiner.date}</td>
               <td style={tableCellStyle}>
                 <button onClick={() => handleUpdate(examiner.examinerId)} style={buttonStyle}>Update</button>
-                <button onClick={() => handleDelete(examiner.examinerId)} style={buttonStyle}>Delete</button>
+                <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} style={buttonStyle}>Delete</button>
+
               </td>
             </tr>
           ))}
