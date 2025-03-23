@@ -21,6 +21,14 @@ export default function AddExaminer() {
     .then(response => {
       console.log("Success:", response.data);  // Log the response from the backend
       alert("New examiner added successfully");
+
+       setName("");
+       setId("");
+       setCode("");
+       setAvailability("");
+       setDate("");
+
+
     })
     .catch(err => {
       if (err.response) {
