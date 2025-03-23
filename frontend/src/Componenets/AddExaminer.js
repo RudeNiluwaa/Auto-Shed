@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function AddExaminer() {
   const [examinerName, setName] = useState("");
-  const [examinerId, setId] = useState("");
+  const [examinerId, setId] = useState(""); 
   const [moduleCode, setCode] = useState("");
   const [availability, setAvailability] = useState("");
   const [date, setDate] = useState("");
@@ -22,7 +22,7 @@ export default function AddExaminer() {
       },
     })
     .then(response => {
-      console.log("Success:", response.data);  // Log the response from the backend
+      console.log("Success:", response.data);
       alert("New examiner added successfully");
 
        setName("");
@@ -32,11 +32,9 @@ export default function AddExaminer() {
        setDate("");
        
        navigate("/get"); 
-
     })
     .catch(err => {
       if (err.response) {
-        // If there's a response error (like 400, 500, etc.), show the response message
         if (err.response.data.message.includes("E11000 duplicate key error")) {
           alert("Examiner ID already exists. Please choose a different ID.");
         } else {
@@ -44,54 +42,21 @@ export default function AddExaminer() {
           alert(`Failed to add new examiner: ${err.response.data.message || "Unknown error"}`);
         }
       } else if (err.request) {
-        // If no response received, but the request was sent
         console.error("Error:", err.request);
         alert("Failed to add new examiner: No response from server");
       } else {
-        // For any other errors (e.g., setup errors)
         console.error("Error:", err.message);
         alert(`Failed to add new examiner: ${err.message}`);
       }
     });
   };
-  
-  
-
-  const formStyle = {
-    width: "350px",
-    margin: "auto",
-    padding: "20px",
-    border: "1px solid #ccc",
-    borderRadius: "10px",
-    backgroundColor: "#f9f9f9",
-    boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)"
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "8px",
-    margin: "5px 0",
-    borderRadius: "5px",
-    border: "1px solid #aaa"
-  };
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "16px"
-  };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} style={formStyle} >
-        <h2 style={{ textAlign: "center", color: "#333" }}>Add Examiner</h2>
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <form onSubmit={handleSubmit} className="w-full max-w-md p-6 bg-white shadow-md rounded-lg border border-gray-300">
+        <h2 className="text-center text-2xl font-semibold text-gray-800 mb-6">Add Examiner</h2>
 
-        <label htmlFor="examinerName">Examiner Name:</label>
+        <label htmlFor="examinerName" className="block text-sm font-medium text-gray-700">Examiner Name:</label>
         <input
           type="text"
           id="examinerName"
@@ -99,10 +64,10 @@ export default function AddExaminer() {
           value={examinerName}
           onChange={(e) => setName(e.target.value)}
           required
-          style={inputStyle}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label htmlFor="examinerId">Examiner ID:</label>
+        <label htmlFor="examinerId" className="block text-sm font-medium text-gray-700">Examiner ID:</label>
         <input
           type="text"
           id="examinerId"
@@ -110,10 +75,10 @@ export default function AddExaminer() {
           value={examinerId}
           onChange={(e) => setId(e.target.value)}
           required
-          style={inputStyle}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label htmlFor="moduleCode">Module Code:</label>
+        <label htmlFor="moduleCode" className="block text-sm font-medium text-gray-700">Module Code:</label>
         <input
           type="text"
           id="moduleCode"
@@ -121,10 +86,10 @@ export default function AddExaminer() {
           value={moduleCode}
           onChange={(e) => setCode(e.target.value)}
           required
-          style={inputStyle}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label htmlFor="availability">Availability:</label>
+        <label htmlFor="availability" className="block text-sm font-medium text-gray-700">Availability:</label>
         <input
           type="text"
           id="availability"
@@ -132,10 +97,10 @@ export default function AddExaminer() {
           value={availability}
           onChange={(e) => setAvailability(e.target.value)}
           required
-          style={inputStyle}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label htmlFor="date">Date:</label>
+        <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date:</label>
         <input
           type="date"
           id="date"
@@ -143,13 +108,16 @@ export default function AddExaminer() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          style={inputStyle}
+          className="w-full p-3 mb-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <button type="submit" style={buttonStyle}>Submit</button>
+        <button type="submit" className="w-full p-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+          Submit
+        </button>
       </form>
     </div>
   );
 }
+
 
 
