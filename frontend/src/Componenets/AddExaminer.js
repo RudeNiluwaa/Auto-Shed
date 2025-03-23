@@ -31,7 +31,7 @@ export default function AddExaminer() {
        setAvailability("");
        setDate("");
        
-       navigate("/get"); 
+       navigate("/get-examiner"); 
     })
     .catch(err => {
       if (err.response) {
@@ -52,7 +52,7 @@ export default function AddExaminer() {
   };
 
   const handleMoreInfoClick = () => {
-    navigate("/get");  // Navigate to GetExaminers.js
+    navigate("/get-examiner");  // Navigate to GetExaminers.js
   };
 
   return (

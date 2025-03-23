@@ -69,7 +69,7 @@ export default function ExaminerList() {
 
   
   const handleAddExaminer = () => {
-    navigate('/add'); 
+    navigate('/add-examiner'); 
   };
 
   return (
