@@ -14,29 +14,35 @@ export default function AddExaminer() {
 
   const validateForm = () => {
     let errors = {};
-    const nameRegex = /^[A-Za-z ]+$/;
-    const idRegex = /^[A-Za-z0-9_-]+$/;
-    const moduleRegex = /^[A-Za-z]{2,}[0-9]{2,}$/;
-    const today = new Date().toISOString().split("T")[0];
+    const nameRegex = /^[A-Za-z ]+$/;  
+    const idRegex = /^E\d{4}$/; 
+    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)[1-4][0-9]{3}$/; 
+    const today = new Date().toISOString().split("T")[0];  
 
+    // Validate examiner name
     if (!examinerName.trim()) errors.examinerName = "Examiner name is required";
     else if (!nameRegex.test(examinerName)) errors.examinerName = "Only letters and spaces allowed";
 
+    // Validate examiner ID
     if (!examinerId.trim()) errors.examinerId = "Examiner ID is required";
     else if (!idRegex.test(examinerId)) errors.examinerId = "Alphanumeric only (no special characters)";
 
+    // Validate module code
     if (!moduleCode.trim()) errors.moduleCode = "Module code is required";
-    else if (!moduleRegex.test(moduleCode)) errors.moduleCode = "Format: Letters + Numbers (e.g., CS101)";
+    else if (!moduleRegex.test(moduleCode)) errors.moduleCode = "Module code format is invalid. It should be like IT2010, CS4050, SE2030.";
 
+    // Validate availability
     if (!availability.trim()) errors.availability = "Availability is required";
     else if (!["Available", "Unavailable"].includes(availability)) errors.availability = "Must be 'Available' or 'Unavailable'";
 
+    // Validate date
     if (!date) errors.date = "Date is required";
     else if (date < today) errors.date = "Date cannot be in the past";
 
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+    setErrors(errors);  
+    return Object.keys(errors).length === 0; 
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

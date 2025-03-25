@@ -47,35 +47,35 @@ export default function ExaminerList() {
 
   const validateForm = () => {
     let errors = {};
-  
-    const nameRegex = /^[A-Za-z ]+$/;   
-    const idRegex = /^[A-Za-z0-9_-]+$/;  
-    const moduleRegex = /^[A-Za-z]{2,}[0-9]{2,}$/;  
-    const today = new Date().toISOString().split("T")[0];  
-  
+    const nameRegex = /^[A-Za-z ]+$/;
+    const idRegex = /^E\d{4}$/;
+    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)(1|2|3|4)[0-9]{2}0$/;
+    const today = new Date().toISOString().split("T")[0]; 
+
     // Validate examiner name
     if (!currentExaminer.examinerName.trim()) errors.examinerName = "Examiner name is required";
     else if (!nameRegex.test(currentExaminer.examinerName)) errors.examinerName = "Only letters and spaces allowed";
-  
+
     // Validate examiner ID
     if (!currentExaminer.examinerId.trim()) errors.examinerId = "Examiner ID is required";
     else if (!idRegex.test(currentExaminer.examinerId)) errors.examinerId = "Alphanumeric only (no special characters)";
-  
+
     // Validate module code
     if (!currentExaminer.moduleCode.trim()) errors.moduleCode = "Module code is required";
-    else if (!moduleRegex.test(currentExaminer.moduleCode)) errors.moduleCode = "Format: Letters + Numbers (e.g., CS101)";
-  
+    else if (!moduleRegex.test(currentExaminer.moduleCode)) errors.moduleCode = "Module code format is invalid. It should be like IT2010, CS4050, SE2030.";
+
     // Validate availability
     if (!currentExaminer.availability.trim()) errors.availability = "Availability is required";
     else if (!["Available", "Unavailable"].includes(currentExaminer.availability)) errors.availability = "Must be 'Available' or 'Unavailable'";
-  
+
     // Validate date
     if (!currentExaminer.date) errors.date = "Date is required";
     else if (currentExaminer.date < today) errors.date = "Date cannot be in the past";
-  
+
     setErrors(errors);  
-    return Object.keys(errors).length === 0;  
-  };
+    return Object.keys(errors).length === 0; 
+};
+
   
   
 
