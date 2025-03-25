@@ -31,7 +31,7 @@ examinerName :
    required: true
  }
 
-});
+}, {timestamps : true});
 
 const Examiner = mongoose.model('examiner', examinerSchema);
 
