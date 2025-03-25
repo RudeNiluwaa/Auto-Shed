@@ -11,8 +11,8 @@ examinerName :
  examinerId : {
 
     type: String,
-    required: true,
-    unique: true
+    required: true
+   
  },
 
  moduleCode :{
