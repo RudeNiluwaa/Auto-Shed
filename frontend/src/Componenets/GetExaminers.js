@@ -44,6 +44,7 @@ export default function ExaminerList() {
     setErrors({});  
     setIsEditing(true);
   };
+  
 
   const validateForm = () => {
     let errors = {};
@@ -154,7 +155,7 @@ export default function ExaminerList() {
             {errors.examinerName && <p style={{ color: 'red' }}>{errors.examinerName}</p>}
 
             <label>Examiner ID:</label>
-            <input type="text" name="examinerId" value={currentExaminer.examinerId} onChange={handleChange} disabled style={inputStyle} />
+            <input type="text" name="examinerId" value={currentExaminer.examinerId} onChange={handleChange} style={inputStyle} />
             
             <label>Module Code:</label>
             <input type="text" name="moduleCode" value={currentExaminer.moduleCode} onChange={handleChange} style={inputStyle} />
