@@ -5,7 +5,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import examinerRouter from './routes/examiner.routes.js';
 import rescheduleRouter from './routes/reschedule.routes.js';
-import presentationRouter from './routes/presentation.routes.js';
+//import presentationRouter from './routes/presentation.routes.js';
+import authRouter from './routes/auth.router.js';
 
 dotenv.config();
 
@@ -29,8 +30,9 @@ connection.once('open', () => {
 
 app.use('/examiner', examinerRouter);
 app.use('/reschedule', rescheduleRouter);
-app.use('/presentation', presentationRouter);
+//app.use('/presentation', presentationRouter);
+app.use('/auth', authRouter);
 
 app.listen(PORT, () => {
-    console.log(`Appis running on port ${PORT}`);
+    console.log(`App is running on port ${PORT}`);
 });

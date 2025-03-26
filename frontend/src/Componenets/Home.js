@@ -1,24 +1,38 @@
 import { useEffect, useState } from 'react'; 
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function Home() {
   const [presentations, setPresentations] = useState([]);
-  const userId = "IT22281678"; // Replace this with actual logged-in user ID
+  const navigate = useNavigate();
+  
+  // Get user ID from token
+  const token = localStorage.getItem('token');
+  let userId = null;
+  if (token) {
+    const decoded = jwtDecode(token);
+    userId = decoded.userId; // Ensure your token contains 'userId'
+  } else {
+    navigate('/login'); // Redirect to login if not authenticated
+  }
 
   useEffect(() => {
-    axios.get('http://localhost:8070/presentation/all')
+    axios.get('http://localhost:8070/auth/presentations', {
+      headers: { Authorization: `Bearer ${token}` } // Send token for authentication
+    })
       .then(res => {
-        console.log("presentations:", res.data)
-        const userRequests = res.data.filter(p => p.userId === userId); // Filter user-specific requests
-        console.log("Filtered:", userRequests)
+        console.log("Presentations:", res.data);
+        const userRequests = res.data.filter(p => p.userId === userId);
         setPresentations(userRequests);
       })
       .catch(err => console.log(err));
-  }, []);
+  }, [userId, token]);
 
   function handleDelete(id) {
-    axios.delete(`http://localhost:8070/presentation/delete/${id}`)
+    axios.delete(`http://localhost:8070/auth/presentation/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
       .then(() => window.location.reload())
       .catch(err => console.log(err));
   }
