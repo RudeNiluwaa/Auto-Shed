@@ -209,20 +209,22 @@ router.put('/presentation/:id', auth, async (req, res) => {
 router.delete('/presentation/:id', auth, async (req, res) => {
     try {
         const presentation = await Presentation.findById(req.params.id);
+        console.log("Found presentation:", presentation);
 
         if (!presentation) {
             return res.status(404).json({ msg: 'Presentation not found' });
         }
 
-        // Ensure the user owns the presentation request
+        // Check if the user owns the presentation
         if (presentation.user.toString() !== req.user.id) {
+            console.log("User not authorized to delete this presentation");
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
         await presentation.remove();
         res.json({ msg: 'Presentation deleted successfully' });
     } catch (err) {
-        console.error(err.message);
+        console.error("Error during delete operation:", err);  // More detailed logging
         res.status(500).send('Server error');
     }
 });
