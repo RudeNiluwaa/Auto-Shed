@@ -144,6 +144,77 @@ router.post('/reset-password/:token', async (req, res) => {
     }
 });
 
+router.get('/admin/presentations', auth, async (req, res) => {
+    try {
+        const presentations = await Presentation.find(); // Find all presentations in the database
+        res.json(presentations); // Send them as the response
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+router.put('/admin/presentation/edit', auth, async (req, res) => {
+    try {
+        const { title, newTitle, newPresenter, newTimeSlot, newStatus } = req.body;
+
+        // Find the presentation by title
+        const presentation = await Presentation.findOne({ title });
+
+        if (!presentation) {
+            return res.status(404).json({ msg: 'Presentation not found' });
+        }
+
+        // Update the presentation details
+        if (newTitle) presentation.title = newTitle;
+        if (newPresenter) presentation.presenter = newPresenter;
+        if (newTimeSlot) presentation.timeSlot = newTimeSlot;
+        if (newStatus) presentation.status = newStatus;
+
+        // Save the updated presentation
+        await presentation.save();
+        res.json({ msg: 'Presentation updated successfully', presentation });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+router.put('/admin/presentation/status', auth, async (req, res) => {
+    try {
+        const { title, status } = req.body;
+
+        const presentation = await Presentation.findOne({ title });
+
+        if (!presentation) {
+            return res.status(404).json({ msg: 'Presentation not found' });
+        }
+
+        presentation.status = status; // Update status to "Accepted" or "Rejected"
+        await presentation.save();
+
+        res.json({ msg: 'Presentation status updated', presentation });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+router.put('/admin/presentation/status/:id', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const updatedPresentation = await Presentation.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+        res.json(updatedPresentation);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating status' });
+    }
+});
+
 // Read all scheduled presentations
 router.get('/presentations', auth, async (req, res) => {
     try {

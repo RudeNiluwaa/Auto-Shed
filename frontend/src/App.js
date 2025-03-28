@@ -12,7 +12,6 @@ import PassReset from './Componenets/PassReset'
 import ForgotPass from './Componenets/ForgotPass'
 import Admin from './Componenets/Admin'
 
-
 function App() {
   return (
 

@@ -12,60 +12,35 @@ function Home() {
   let userId = null;
   if (token) {
     const decoded = jwtDecode(token);
-    userId = decoded.user.id; // Ensure your token contains 'userId'
-    console.log("decoded", decoded);
-    console.log("user", userId)
-    
+    userId = decoded.user.id; 
   } else {
     navigate('/login'); // Redirect to login if not authenticated
   }
 
   useEffect(() => {
     axios.get('http://localhost:8070/auth/presentations', {
-      headers: { Authorization: `Bearer ${token}` } // Send token for authentication
+      headers: { Authorization: `Bearer ${token}` } 
     })
       .then(res => {
-        console.log("Presentations from backend:", res.data);
-        res.data.forEach((presentation, index) => {
-          console.log(`Presentation ${index}:`, presentation);
-        });
         const userRequests = res.data.filter(presentation => 
           presentation.user && presentation.user.toString() === userId
         );
-        console.log("Filtered Presentations:", userRequests);
         setPresentations(userRequests);
       })
       .catch(err => console.log(err));
   }, [userId, token]);
 
   function handleDelete(id) {
-    // Get the token from localStorage
-    console.log("user", id)
-    const token = localStorage.getItem('token');
-    
-    // Check if the token exists
-    if (!token) {
-      console.error("No token found. Please log in.");
-      return;
-    }
-  
-    // Send the delete request to the backend
     axios.delete(`http://localhost:8070/auth/presentation/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }  // Pass token for authentication
+      headers: { Authorization: `Bearer ${token}` }  
     })
       .then(response => {
-        console.log("Delete response:", response.data);
-        
-        // Remove the deleted presentation from the state
         setPresentations(prev => prev.filter(presentation => presentation._id !== id));
-        console.log("deleted", setPresentations)
       })
       .catch(err => {
         console.error('Error deleting presentation:', err.response ? err.response.data : err.message);
       });
   }
-  
-  
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -93,6 +68,11 @@ function Home() {
                   <h3 className="text-lg font-semibold">{p.title}</h3>
                   <p className="text-gray-600">Presenter: {p.presenter}</p>
                   <p className="text-gray-500">Time Slot: {p.timeSlot}</p>
+                  <p className={`text-white px-2 py-1 rounded-md 
+                    ${p.status === 'Accepted' ? 'bg-green-500' : p.status === 'Rejected' ? 'bg-red-500' : 'bg-gray-400'}`}
+                  >
+                    {p.status}
+                  </p>
                 </div>
                 <div className="space-x-2">
                   <Link to={`/edit/${p._id}`} className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">
