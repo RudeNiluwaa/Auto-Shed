@@ -219,7 +219,7 @@ router.delete('/presentation/:id', auth, async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        await presentation.remove();
+        await Presentation.findByIdAndDelete(req.params.id);
         res.json({ msg: 'Presentation deleted successfully' });
     } catch (err) {
         console.error(err.message);

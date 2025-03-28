@@ -39,12 +39,33 @@ function Home() {
   }, [userId, token]);
 
   function handleDelete(id) {
+    // Get the token from localStorage
+    console.log("user", id)
+    const token = localStorage.getItem('token');
+    
+    // Check if the token exists
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+  
+    // Send the delete request to the backend
     axios.delete(`http://localhost:8070/auth/presentation/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
-      .then(() => window.location.reload())
-      .catch(err => console.log(err));
+      headers: { Authorization: `Bearer ${token}` }  // Pass token for authentication
+    })
+      .then(response => {
+        console.log("Delete response:", response.data);
+        
+        // Remove the deleted presentation from the state
+        setPresentations(prev => prev.filter(presentation => presentation._id !== id));
+        console.log("deleted", setPresentations)
+      })
+      .catch(err => {
+        console.error('Error deleting presentation:', err.response ? err.response.data : err.message);
+      });
   }
+  
+  
 
   return (
     <div className="bg-gray-100 min-h-screen">
