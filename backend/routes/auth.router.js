@@ -233,7 +233,8 @@ function verifyToken(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.userId;
+        req.userId = decoded.user.id;
+        console.log(decoded)
         next();
     } catch (err) {
         res.status(403).json({ msg: 'Invalid token' });
@@ -243,7 +244,8 @@ function verifyToken(req, res, next) {
 router.post('/create', verifyToken, async (req, res) => {
     try {
         const { title, presenter, timeSlot } = req.body;
-        const presentation = new Presentation({ title, presenter, timeSlot, userId: req.userId });
+        const userId = req.userId;
+        const presentation = new Presentation({ title, presenter, timeSlot, user: userId });
         await presentation.save();
         res.json({ msg: 'Presentation created successfully' });
     } catch (err) {

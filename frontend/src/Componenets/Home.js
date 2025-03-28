@@ -12,7 +12,10 @@ function Home() {
   let userId = null;
   if (token) {
     const decoded = jwtDecode(token);
-    userId = decoded.userId; // Ensure your token contains 'userId'
+    userId = decoded.user.id; // Ensure your token contains 'userId'
+    console.log("decoded", decoded);
+    console.log("user", userId)
+    
   } else {
     navigate('/login'); // Redirect to login if not authenticated
   }
@@ -22,8 +25,14 @@ function Home() {
       headers: { Authorization: `Bearer ${token}` } // Send token for authentication
     })
       .then(res => {
-        console.log("Presentations:", res.data);
-        const userRequests = res.data.filter(p => p.userId === userId);
+        console.log("Presentations from backend:", res.data);
+        res.data.forEach((presentation, index) => {
+          console.log(`Presentation ${index}:`, presentation);
+        });
+        const userRequests = res.data.filter(presentation => 
+          presentation.user && presentation.user.toString() === userId
+        );
+        console.log("Filtered Presentations:", userRequests);
         setPresentations(userRequests);
       })
       .catch(err => console.log(err));
