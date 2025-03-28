@@ -43,54 +43,58 @@ function Home() {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      {/* Navbar */}
-      <nav className="bg-blue-500 p-4 text-white shadow-md">
+<div className="bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 min-h-screen p-6">
+    {/* Navbar */}
+    <nav className="bg-white/10 backdrop-blur-lg p-4 text-white shadow-md rounded-xl">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Presentation Scheduler</h1>
-          <Link to="/createpresentation" className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-blue-100">
-            Create Presentation
-          </Link>
+            <h1 className="text-3xl font-bold tracking-wider">Presentation Scheduler</h1>
+            <Link 
+                to="/createpresentation" 
+                className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
+            >
+                + New Presentation
+            </Link>
         </div>
-      </nav>
+    </nav>
 
-      {/* Presentations Section */}
-      <div className="container mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Your Presentation Requests</h2>
+    {/* Presentations Section */}
+    <div className="container mx-auto mt-10 p-8 bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20">
+        <h2 className="text-2xl font-bold text-white mb-6 tracking-wide">Your Presentations</h2>
 
         {presentations.length === 0 ? (
-          <p className="text-gray-500">No presentations found.</p>
+            <p className="text-gray-300 text-lg text-center">No presentations found.</p>
         ) : (
-          <ul className="space-y-4">
-            {presentations.map(p => (
-              <li key={p._id} className="p-4 border rounded-lg flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold">{p.title}</h3>
-                  <p className="text-gray-600">Presenter: {p.presenter}</p>
-                  <p className="text-gray-500">Time Slot: {p.timeSlot}</p>
-                  <p className={`text-white px-2 py-1 rounded-md 
-                    ${p.status === 'Accepted' ? 'bg-green-500' : p.status === 'Rejected' ? 'bg-red-500' : 'bg-gray-400'}`}
-                  >
-                    {p.status}
-                  </p>
-                </div>
-                <div className="space-x-2">
-                  <Link to={`/edit/${p._id}`} className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">
-                    Edit
-                  </Link>
-                  <button 
-                    onClick={() => handleDelete(p._id)} 
-                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+            <ul className="space-y-6">
+                {presentations.map(p => (
+                    <li key={p._id} className="p-5 bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl flex justify-between items-center shadow-md hover:shadow-lg transition-all duration-300">
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">{p.title}</h3>
+                            <p className="text-gray-200">Presenter: <span className="font-medium">{p.presenter}</span></p>
+                            <p className="text-gray-300">Time Slot: <span className="font-medium">{p.timeSlot}</span></p>
+                            <p className={`text-white px-4 py-2 mt-2 inline-block font-semibold rounded-lg tracking-wide shadow-md
+                                ${p.status === 'Accepted' ? 'bg-green-500' : p.status === 'Rejected' ? 'bg-red-500' : 'bg-gray-500'}`}
+                            >
+                                {p.status}
+                            </p>
+                        </div>
+                        <div className="space-x-3">
+                            <Link to={`/edit/${p._id}`} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300">
+                                Edit
+                            </Link>
+                            <button 
+                                onClick={() => handleDelete(p._id)} 
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
         )}
-      </div>
     </div>
+</div>
+
   );
 }
 

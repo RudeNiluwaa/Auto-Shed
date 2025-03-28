@@ -110,18 +110,7 @@ function EditPresentation() {
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-lg font-semibold text-gray-700 mb-2">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="p-3 border rounded-md"
-            >
-              <option value="Pending">Pending</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-          </div>
+
 
           <div className="flex justify-between items-center mt-6">
             <button

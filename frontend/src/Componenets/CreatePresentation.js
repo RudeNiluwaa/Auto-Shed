@@ -39,56 +39,61 @@ const CreatePresentation = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold text-center mb-6">Create a Presentation</h2>
-
-                {error && <div className="text-red-500 mb-4">{error}</div>}
-                {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
-
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700" htmlFor="title">Title</label>
-                        <input
-                            type="text"
-                            id="title"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700" htmlFor="presenter">Presenter</label>
-                        <input
-                            type="text"
-                            id="presenter"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            value={presenter}
-                            onChange={(e) => setPresenter(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700" htmlFor="timeSlot">Time Slot</label>
-                        <input
-                            type="text"
-                            id="timeSlot"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            value={timeSlot}
-                            onChange={(e) => setTimeSlot(e.target.value)}
-                        />
-                    </div>
-
-                    <button 
-                        type="submit" 
-                        className="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                    >
-                        Create Presentation
-                    </button>
-                </form>
-            </div>
-        </div>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-700 via-blue-500 to-blue-400 p-6">
+      <div className="w-full max-w-lg bg-white/20 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/30">
+          <h2 className="text-3xl font-extrabold text-center text-white mb-6 tracking-wide">Create a Presentation</h2>
+  
+          {error && <div className="text-red-400 text-center mb-4 font-semibold">{error}</div>}
+          {successMessage && <div className="text-green-400 text-center mb-4 font-semibold">{successMessage}</div>}
+  
+          <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                  <label className="block text-white font-medium mb-1" htmlFor="title">Title</label>
+                  <input
+                      type="text"
+                      id="title"
+                      className="w-full p-3 rounded-xl bg-white/30 text-black placeholder-white/50 border border-white/50 focus:ring-2 focus:ring-blue-300 focus:outline-none transition duration-300"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter title"
+                  />
+              </div>
+  
+              <div>
+                  <label className="block text-white font-medium mb-1" htmlFor="presenter">Presenter</label>
+                  <input
+                      type="text"
+                      id="presenter"
+                      className="w-full p-3 rounded-xl bg-white/30 text-black placeholder-white/50 border border-white/50 focus:ring-2 focus:ring-blue-300 focus:outline-none transition duration-300"
+                      value={presenter}
+                      onChange={(e) => setPresenter(e.target.value)}
+                      placeholder="Enter presenter name"
+                  />
+              </div>
+  
+              <div>
+                  <label className="block text-white font-medium mb-1" htmlFor="timeSlot">Time Slot</label>
+                  <input
+                      type="text"
+                      id="timeSlot"
+                      className="w-full p-3 rounded-xl bg-white/30 text-black placeholder-white/50 border border-white/50 focus:ring-2 focus:ring-blue-300 focus:outline-none transition duration-300"
+                      value={timeSlot}
+                      onChange={(e) => setTimeSlot(e.target.value)}
+                      placeholder="Enter time slot"
+                  />
+              </div>
+  
+              <button 
+                  type="submit" 
+                  className="w-full p-3 bg-black text-white font-semibold rounded-xl shadow-lg hover:bg-white hover:text-black transition duration-300"
+              >
+                  Create Presentation
+              </button>
+          </form>
+      </div>
+  </div>
+  
+  
     );
 };
 
