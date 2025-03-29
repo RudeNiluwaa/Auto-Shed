@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -86,38 +86,56 @@ export default function ExaminerList({ role }) {
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
 
-        <div className="overflow-x-auto rounded-xl shadow-2xl">
-          <table className="min-w-full bg-white text-black rounded-xl overflow-hidden">
-            <thead className="bg-blue-700 text-white">
-              <tr>
-                {["Name", "ID", "Module", "Availability", "Date"].map(head => (
-                  <th key={head} className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">{head}</th>
-                ))}
-                {/* Conditionally render "Actions" column for admin role */}
-                {role === 'admin' && <th className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {examiners.map(examiner => (
-                <tr key={examiner.examinerId} className="even:bg-gray-100">
-                  <td className="px-4 py-2 border border-gray-300">{examiner.examinerName}</td>
-                  <td className="px-4 py-2 border border-gray-300">{examiner.examinerId}</td>
-                  <td className="px-4 py-2 border border-gray-300">{examiner.moduleCode}</td>
-                  <td className="px-4 py-2 border border-gray-300">{examiner.availability}</td>
-                  <td className="px-4 py-2 border border-gray-300">{examiner.date}</td>
-                  {/* Conditionally render "Actions" buttons for admin role */}
-                  {role === 'admin' && (
-                    <td className="px-4 py-2 border border-gray-300 space-x-2">
-                      <button onClick={() => handleUpdate(examiner.examinerId)} className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md transition">Update</button>
-                      <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded-md transition">Delete</button>
-                    </td>
-                  )}
+        {/* ✅ User View: Cards */}
+        {role !== 'admin' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {examiners.map((examiner) => (
+              <div
+                key={examiner._id}
+                className="bg-white text-black rounded-2xl shadow-xl p-6 transition-all hover:shadow-2xl hover:scale-105 duration-300"
+              >
+                <h3 className="text-xl font-bold mb-2">{examiner.examinerName}</h3>
+                <p className="text-gray-700"><span className="font-medium">Examiner ID:</span> {examiner.examinerId}</p>
+                <p className="text-gray-700"><span className="font-medium">Module:</span> {examiner.moduleCode}</p>
+                <p className="text-gray-700"><span className="font-medium">Availability:</span> {examiner.availability}</p>
+                <p className="text-gray-700"><span className="font-medium">Date:</span> {examiner.date}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // ✅ Admin View: Table
+          <div className="overflow-x-auto rounded-xl shadow-2xl">
+            <table className="min-w-full bg-white text-black rounded-xl overflow-hidden">
+              <thead className="bg-blue-700 text-white">
+                <tr>
+                  {["Name", "ID", "Module", "Availability", "Date"].map(head => (
+                    <th key={head} className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">{head}</th>
+                  ))}
+                  {role === 'admin' && <th className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">Actions</th>}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {examiners.map(examiner => (
+                  <tr key={examiner.examinerId} className="even:bg-gray-100">
+                    <td className="px-4 py-2 border border-gray-300">{examiner.examinerName}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.examinerId}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.moduleCode}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.availability}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.date}</td>
+                    {role === 'admin' && (
+                      <td className="px-4 py-2 border border-gray-300 space-x-2">
+                        <button onClick={() => handleUpdate(examiner.examinerId)} className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md transition">Update</button>
+                        <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded-md transition">Delete</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
+        {/* Admin Edit Form */}
         {isEditing && (
           <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg text-black">
             <h3 className="text-xl font-semibold mb-4">Edit Examiner</h3>
@@ -143,6 +161,7 @@ export default function ExaminerList({ role }) {
           </div>
         )}
 
+        {/* Admin Add Button */}
         <div className="mt-12 text-center">
           {role === 'admin' && (
             <button 
@@ -153,7 +172,6 @@ export default function ExaminerList({ role }) {
             </button>
           )}
         </div>
-
       </div>
     </div>
   );

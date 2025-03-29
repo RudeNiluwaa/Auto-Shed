@@ -15,8 +15,8 @@ export default function AddExaminer() {
   const validateForm = () => {
     let errors = {};
     const nameRegex = /^[A-Za-z ]+$/;  
-    const idRegex = /^E\d{4}$/; 
-    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)[1-4]\d{3}$/; 
+    const idRegex = /^[A-Z]+\d{4}$/;
+    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)[1-9]\d{3}$/; 
     const today = new Date().toISOString().split("T")[0];  
 
     if (!examinerName.trim()) errors.examinerName = "Examiner name is required";
@@ -26,7 +26,7 @@ export default function AddExaminer() {
     else if (!idRegex.test(examinerId)) errors.examinerId = "ID must be like E1234";
 
     if (!moduleCode.trim()) errors.moduleCode = "Module code is required";
-    else if (!moduleRegex.test(moduleCode)) errors.moduleCode = "Invalid format (e.g., IT2010)";
+    else if (!moduleRegex.test(moduleCode)) errors.moduleCode = "Module code must start with one of: IT, SE, CS, DS, ISE, CSNE (e.g., IT2010)";
 
     if (!availability.trim()) errors.availability = "Availability is required";
     else if (!["Available", "Unavailable"].includes(availability)) errors.availability = "Must be 'Available' or 'Unavailable'";
