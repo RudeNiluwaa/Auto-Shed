@@ -1,6 +1,8 @@
 import React from 'react';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './App.css';
+
+//Pamada Pages
 import AddExaminer from './Componenets/AddExaminer';
 import GetExaminers from './Componenets/GetExaminers';
 import Home from './Componenets/Home';

@@ -11,8 +11,8 @@ examinerName :
  examinerId : {
 
     type: String,
-    required: true,
-    unique: true
+    required: true
+   
  },
 
  moduleCode :{
@@ -31,7 +31,7 @@ examinerName :
    required: true
  }
 
-});
+}, {timestamps : true});
 
 const Examiner = mongoose.model('examiner', examinerSchema);
 

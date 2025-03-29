@@ -74,7 +74,7 @@ router.route('/get/:id').get(async (req, res) => {
 
     let id = req.params.id;
 
-    const request = await Rechedule.findByIdAndDelete(id).then((fetch) => {
+    const request = await Rechedule.findById(id).then((fetch) => {
         res.status(200).send({status : "Request fetched successfully", fetch})
     }).catch((err) => {
         console.log(err);

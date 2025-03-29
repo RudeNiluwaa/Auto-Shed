@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.3s ease-in-out;
+}
+
+.input-field:focus {
+  border-color: #4CAF50; /* Green */
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}

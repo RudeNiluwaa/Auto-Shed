@@ -8,121 +8,130 @@ export default function AddExaminer() {
   const [moduleCode, setCode] = useState("");
   const [availability, setAvailability] = useState("");
   const [date, setDate] = useState("");
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    let errors = {};
+    const nameRegex = /^[A-Za-z ]+$/;  
+    const idRegex = /^E\d{4}$/; 
+    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)[1-4][0-9]{3}$/; 
+    const today = new Date().toISOString().split("T")[0];  
+
+    // Validate examiner name
+    if (!examinerName.trim()) errors.examinerName = "Examiner name is required";
+    else if (!nameRegex.test(examinerName)) errors.examinerName = "Only letters and spaces allowed";
+
+    // Validate examiner ID
+    if (!examinerId.trim()) errors.examinerId = "Examiner ID is required";
+    else if (!idRegex.test(examinerId)) errors.examinerId = "Alphanumeric only (no special characters)";
+
+    // Validate module code
+    if (!moduleCode.trim()) errors.moduleCode = "Module code is required";
+    else if (!moduleRegex.test(moduleCode)) errors.moduleCode = "Module code format is invalid. It should be like IT2010, CS4050, SE2030.";
+
+    // Validate availability
+    if (!availability.trim()) errors.availability = "Availability is required";
+    else if (!["Available", "Unavailable"].includes(availability)) errors.availability = "Must be 'Available' or 'Unavailable'";
+
+    // Validate date
+    if (!date) errors.date = "Date is required";
+    else if (date < today) errors.date = "Date cannot be in the past";
+
+    setErrors(errors);  
+    return Object.keys(errors).length === 0; 
+};
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
   
     const newExaminer = { examinerName, examinerId, moduleCode, availability, date };
   
     axios.post("http://localhost:8070/examiner/create", newExaminer, {
-      headers: {
-        "Content-Type": "application/json",  
-      },
+      headers: { "Content-Type": "application/json" },
     })
     .then(response => {
-      console.log("Success:", response.data);
       alert("New examiner added successfully");
-
-       setName("");
-       setId("");
-       setCode("");
-       setAvailability("");
-       setDate("");
-       
-       navigate("/get-examiner"); 
+      setName(""); setId(""); setCode(""); setAvailability(""); setDate("");
+      navigate("/get-examiner"); 
     })
     .catch(err => {
-      if (err.response) {
-        if (err.response.data.message.includes("E11000 duplicate key error")) {
-          alert("Examiner ID already exists. Please choose a different ID.");
-        } else {
-          console.error("Error:", err.response.data);
-          alert(`Failed to add new examiner: ${err.response.data.message || "Unknown error"}`);
-        }
-      } else if (err.request) {
-        console.error("Error:", err.request);
-        alert("Failed to add new examiner: No response from server");
-      } else {
-        console.error("Error:", err.message);
-        alert(`Failed to add new examiner: ${err.message}`);
-      }
+      alert("Failed to add new examiner: " + (err.response?.data?.message || "Unknown error"));
     });
   };
 
-  const handleMoreInfoClick = () => {
-    navigate("/get-examiner");  // Navigate to GetExaminers.js
-  };
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <form onSubmit={handleSubmit} className="w-full max-w-md p-6 bg-white shadow-md rounded-lg border border-gray-300">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form 
+        onSubmit={handleSubmit} 
+        className="w-full max-w-md p-6 bg-white shadow-lg rounded-lg border border-gray-300"
+      >
         <h2 className="text-center text-2xl font-semibold text-gray-800 mb-6">Add Examiner</h2>
 
-        <label htmlFor="examinerName" className="block text-sm font-medium text-gray-700">Examiner Name:</label>
-        <input
-          type="text"
-          id="examinerName"
-          name="examinerName"
-          value={examinerName}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <label className="block text-sm font-medium text-gray-700">Examiner Name:</label>
+        <input 
+          type="text" 
+          value={examinerName} 
+          onChange={(e) => setName(e.target.value)} 
+          className="input-field"
         />
+        {errors.examinerName && <p className="text-red-500 text-sm">{errors.examinerName}</p>}
 
-        <label htmlFor="examinerId" className="block text-sm font-medium text-gray-700">Examiner ID:</label>
-        <input
-          type="text"
-          id="examinerId"
-          name="examinerId"
-          value={examinerId}
-          onChange={(e) => setId(e.target.value)}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <label className="block text-sm font-medium text-gray-700 mt-4">Examiner ID:</label>
+        <input 
+          type="text" 
+          value={examinerId} 
+          onChange={(e) => setId(e.target.value)} 
+          className="input-field"
         />
+        {errors.examinerId && <p className="text-red-500 text-sm">{errors.examinerId}</p>}
 
-        <label htmlFor="moduleCode" className="block text-sm font-medium text-gray-700">Module Code:</label>
-        <input
-          type="text"
-          id="moduleCode"
-          name="moduleCode"
-          value={moduleCode}
-          onChange={(e) => setCode(e.target.value)}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <label className="block text-sm font-medium text-gray-700 mt-4">Module Code:</label>
+        <input 
+          type="text" 
+          value={moduleCode} 
+          onChange={(e) => setCode(e.target.value)} 
+          className="input-field"
         />
+        {errors.moduleCode && <p className="text-red-500 text-sm">{errors.moduleCode}</p>}
 
-        <label htmlFor="availability" className="block text-sm font-medium text-gray-700">Availability:</label>
-        <input
-          type="text"
-          id="availability"
-          name="availability"
-          value={availability}
-          onChange={(e) => setAvailability(e.target.value)}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <label className="block text-sm font-medium text-gray-700 mt-4">Availability:</label>
+        <select 
+          value={availability} 
+          onChange={(e) => setAvailability(e.target.value)} 
+          className="input-field"
+        >
+          <option value="">Select Availability</option>
+          <option value="Available">Available</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+        {errors.availability && <p className="text-red-500 text-sm">{errors.availability}</p>}
+
+        <label className="block text-sm font-medium text-gray-700 mt-4">Date:</label>
+        <input 
+          type="date" 
+          value={date} 
+          onChange={(e) => setDate(e.target.value)} 
+          className="input-field"
         />
+        {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
 
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date:</label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-          className="w-full p-3 mb-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <button type="submit" className="w-full p-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+        <button 
+          type="submit" 
+          className="w-full mt-6 p-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600"
+        >
           Submit
         </button>
 
-        <button
-          type="button"
-          onClick={handleMoreInfoClick}
-          className="w-full p-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
+        {/* More Info Button */}
+        <button 
+          type="button" 
+          onClick={() => navigate("/get-examiner")} 
+          className="w-full mt-3 p-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
         >
           More Info
         </button>
@@ -130,6 +139,12 @@ export default function AddExaminer() {
     </div>
   );
 }
+
+
+ 
+
+
+
 
 
 
