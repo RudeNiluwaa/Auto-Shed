@@ -4,8 +4,12 @@ const presentationSchema = new mongoose.Schema({
   title: { type: String, required: true },
   presenter: { type: String, required: true },
   timeSlot: { type: String, required: true },
-  status: { type: String, default: 'Pending' }, // Pending, Confirmed, Cancelled
-  user: {type : mongoose.Schema.Types.ObjectId, ref : 'User'}
+  status: { 
+    type: String, 
+    enum: ['Pending', 'Confirmed', 'Cancelled'], // Only these values allowed
+    default: 'Pending' 
+  },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 export default mongoose.model('Presentation', presentationSchema);

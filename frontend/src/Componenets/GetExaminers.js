@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-export default function ExaminerList() {
+export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentExaminer, setCurrentExaminer] = useState({
@@ -13,219 +13,166 @@ export default function ExaminerList() {
     date: ''
   });
   const [errors, setErrors] = useState({});
-
   const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('http://localhost:8070/examiner/')
-      .then(response => {
-        setExaminers(response.data);  
-      })
-      .catch(error => {
-        console.error("There was an error fetching the examiners data:", error);
-      });
-  }, []);  
+      .then(response => setExaminers(response.data))
+      .catch(error => console.error("Error fetching data:", error));
+  }, []);
 
-  const handleDelete = (examinerId, mongoId) => {  
-    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)  
+  const handleDelete = (examinerId, mongoId) => {
+    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
       .then(() => {
-        setExaminers(examiners.filter(examiner => examiner._id !== mongoId));
+        setExaminers(prev => prev.filter(e => e._id !== mongoId));
         alert('Examiner deleted successfully');
       })
-      .catch(error => {
-        console.error("Error deleting examiner:", error);
-        alert('Failed to delete examiner');
-      });
+      .catch(() => alert('Failed to delete examiner'));
   };
 
   const handleUpdate = (examinerId) => {
-    const examiner = examiners.find(examiner => examiner.examinerId === examinerId);
+    const examiner = examiners.find(e => e.examinerId === examinerId);
     setCurrentExaminer(examiner);
-    setErrors({});  
+    setErrors({});
     setIsEditing(true);
   };
-  
 
   const validateForm = () => {
-    let errors = {};
+    const errors = {};
     const nameRegex = /^[A-Za-z ]+$/;
     const idRegex = /^E\d{4}$/;
-    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)(1|2|3|4)[0-9]{2}0$/;
-    const today = new Date().toISOString().split("T")[0]; 
+    const moduleRegex = /^(IT|SE|CS|DS|ISE|CSNE)[1-4]\d{3}$/;
+    const today = new Date().toISOString().split("T")[0];
 
-    // Validate examiner name
     if (!currentExaminer.examinerName.trim()) errors.examinerName = "Examiner name is required";
     else if (!nameRegex.test(currentExaminer.examinerName)) errors.examinerName = "Only letters and spaces allowed";
 
-    // Validate examiner ID
     if (!currentExaminer.examinerId.trim()) errors.examinerId = "Examiner ID is required";
-    else if (!idRegex.test(currentExaminer.examinerId)) errors.examinerId = "Alphanumeric only (no special characters)";
+    else if (!idRegex.test(currentExaminer.examinerId)) errors.examinerId = "Invalid ID (e.g., E1234)";
 
-    // Validate module code
     if (!currentExaminer.moduleCode.trim()) errors.moduleCode = "Module code is required";
-    else if (!moduleRegex.test(currentExaminer.moduleCode)) errors.moduleCode = "Module code format is invalid. It should be like IT2010, CS4050, SE2030.";
+    else if (!moduleRegex.test(currentExaminer.moduleCode)) errors.moduleCode = "Invalid format (e.g., IT2010)";
 
-    // Validate availability
     if (!currentExaminer.availability.trim()) errors.availability = "Availability is required";
     else if (!["Available", "Unavailable"].includes(currentExaminer.availability)) errors.availability = "Must be 'Available' or 'Unavailable'";
 
-    // Validate date
     if (!currentExaminer.date) errors.date = "Date is required";
     else if (currentExaminer.date < today) errors.date = "Date cannot be in the past";
 
-    setErrors(errors);  
-    return Object.keys(errors).length === 0; 
-};
-
-  
-  
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer)
-      .then(response => {
-        const updatedExaminers = examiners.map(examiner =>
-          examiner._id === currentExaminer._id ? currentExaminer : examiner
-        );
-        setExaminers(updatedExaminers);
+      .then(() => {
+        setExaminers(prev => prev.map(e => e._id === currentExaminer._id ? currentExaminer : e));
         setIsEditing(false);
         alert('Examiner updated successfully');
       })
-      .catch(error => {
-        console.error("Error updating examiner:", error);
-        alert('Failed to update examiner');
-      });
+      .catch(() => alert('Failed to update examiner'));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCurrentExaminer({ ...currentExaminer, [name]: value });
-  };
-
-  const handleAddExaminer = () => {
-    navigate('/add-examiner'); 
+    setCurrentExaminer(prev => ({ ...prev, [name]: value }));
   };
 
   return (
-    <div>
-      <h2 style={{ textAlign: "center", color: "#333" }}>Examiners List</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 text-white p-8 font-sans">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
 
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <button onClick={handleAddExaminer} style={buttonStyle}>
-          Add Examiner
-        </button>
-      </div>
+        {/* ✅ User View: Cards */}
+        {role !== 'admin' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {examiners.map((examiner) => (
+              <div
+                key={examiner._id}
+                className="bg-white text-black rounded-2xl shadow-xl p-6 transition-all hover:shadow-2xl hover:scale-105 duration-300"
+              >
+                <h3 className="text-xl font-bold mb-2">{examiner.examinerName}</h3>
+                <p className="text-gray-700"><span className="font-medium">Examiner ID:</span> {examiner.examinerId}</p>
+                <p className="text-gray-700"><span className="font-medium">Module:</span> {examiner.moduleCode}</p>
+                <p className="text-gray-700"><span className="font-medium">Availability:</span> {examiner.availability}</p>
+                <p className="text-gray-700"><span className="font-medium">Date:</span> {examiner.date}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // ✅ Admin View: Table
+          <div className="overflow-x-auto rounded-xl shadow-2xl">
+            <table className="min-w-full bg-white text-black rounded-xl overflow-hidden">
+              <thead className="bg-blue-700 text-white">
+                <tr>
+                  {["Name", "ID", "Module", "Availability", "Date"].map(head => (
+                    <th key={head} className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">{head}</th>
+                  ))}
+                  {role === 'admin' && <th className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {examiners.map(examiner => (
+                  <tr key={examiner.examinerId} className="even:bg-gray-100">
+                    <td className="px-4 py-2 border border-gray-300">{examiner.examinerName}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.examinerId}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.moduleCode}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.availability}</td>
+                    <td className="px-4 py-2 border border-gray-300">{examiner.date}</td>
+                    {role === 'admin' && (
+                      <td className="px-4 py-2 border border-gray-300 space-x-2">
+                        <button onClick={() => handleUpdate(examiner.examinerId)} className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md transition">Update</button>
+                        <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded-md transition">Delete</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
-        <thead>
-          <tr>
-            <th style={tableHeaderStyle}>Examiner Name</th>
-            <th style={tableHeaderStyle}>Examiner ID</th>
-            <th style={tableHeaderStyle}>Module Code</th>
-            <th style={tableHeaderStyle}>Availability</th>
-            <th style={tableHeaderStyle}>Date</th>
-            <th style={tableHeaderStyle}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {examiners.map(examiner => (
-            <tr key={examiner.examinerId}>
-              <td style={tableCellStyle}>{examiner.examinerName}</td>
-              <td style={tableCellStyle}>{examiner.examinerId}</td>
-              <td style={tableCellStyle}>{examiner.moduleCode}</td>
-              <td style={tableCellStyle}>{examiner.availability}</td>
-              <td style={tableCellStyle}>{examiner.date}</td>
-              <td style={tableCellStyle}>
-                <button onClick={() => handleUpdate(examiner.examinerId)} style={buttonStyle}>Update</button>
-                <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} style={buttonStyle}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        {/* Admin Edit Form */}
+        {isEditing && (
+          <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg text-black">
+            <h3 className="text-xl font-semibold mb-4">Edit Examiner</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              {["examinerName", "examinerId", "moduleCode", "availability", "date"].map(field => (
+                <div key={field}>
+                  <label className="block font-medium capitalize">{field.replace("examiner", "Examiner ")}:</label>
+                  <input
+                    type={field === "date" ? "date" : "text"}
+                    name={field}
+                    value={currentExaminer[field]}
+                    onChange={handleChange}
+                    className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors[field] && <p className="text-red-600 text-sm mt-1">{errors[field]}</p>}
+                </div>
+              ))}
+              <div className="flex justify-between">
+                <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Update</button>
+                <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-800 text-white px-4 py-2 rounded">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
 
-      {isEditing && (
-        <div style={formContainerStyle}>
-          <h3>Edit Examiner</h3>
-          <form onSubmit={handleEditSubmit}>
-            <label>Examiner Name:</label>
-            <input type="text" name="examinerName" value={currentExaminer.examinerName} onChange={handleChange} style={inputStyle} />
-            {errors.examinerName && <p style={{ color: 'red' }}>{errors.examinerName}</p>}
-
-            <label>Examiner ID:</label>
-            <input type="text" name="examinerId" value={currentExaminer.examinerId} onChange={handleChange} style={inputStyle} />
-            
-            <label>Module Code:</label>
-            <input type="text" name="moduleCode" value={currentExaminer.moduleCode} onChange={handleChange} style={inputStyle} />
-            {errors.moduleCode && <p style={{ color: 'red' }}>{errors.moduleCode}</p>}
-
-            <label>Availability:</label>
-            <input type="text" name="availability" value={currentExaminer.availability} onChange={handleChange} style={inputStyle} />
-            {errors.availability && <p style={{ color: 'red' }}>{errors.availability}</p>}
-
-            <label>Date:</label>
-            <input type="date" name="date" value={currentExaminer.date} onChange={handleChange} style={inputStyle} />
-            {errors.date && <p style={{ color: 'red' }}>{errors.date}</p>}
-            
-            <button type="submit" style={buttonStyle}>Update</button>
-            <button type="button" onClick={() => setIsEditing(false)} style={cancelButtonStyle}>Cancel</button>
-          </form>
+        {/* Admin Add Button */}
+        <div className="mt-12 text-center">
+          {role === 'admin' && (
+            <button 
+              onClick={() => navigate('/add-examiner')} 
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+            >
+              Add Examiner
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
-
-const buttonStyle = {
-  padding: '8px 12px',
-  margin: '5px',
-  backgroundColor: '#007bff',
-  color: 'white',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-const cancelButtonStyle = {
-  ...buttonStyle,
-  backgroundColor: 'red',
-};
-
-const tableHeaderStyle = {
-  border: '1px solid #ddd',
-  padding: '8px',
-  backgroundColor: '#f2f2f2',
-  textAlign: 'left',
-};
-
-const tableCellStyle = {
-  border: '1px solid #ddd',
-  padding: '8px',
-};
-
-const formContainerStyle = {
-  maxWidth: '400px',
-  margin: '20px auto',
-  padding: '20px',
-  border: '1px solid #ddd',
-  borderRadius: '5px',
-  backgroundColor: '#f9f9f9',
-};
-
-const inputStyle = {
-  width: '100%',
-  padding: '8px',
-  margin: '5px 0',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-};
-
-
-
-
-
-
-
-
