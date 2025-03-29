@@ -1,3 +1,4 @@
+/* Keep all your existing styles exactly as they are */
 .App {
   text-align: center;
 }
@@ -37,8 +38,6 @@
   }
 }
 
-
-
 .input-field {
   width: 100%;
   padding: 10px;
@@ -51,4 +50,77 @@
 .input-field:focus {
   border-color: #4CAF50; /* Green */
   box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* ===== NEW ADDITIONS BELOW ===== */
+/* Tailwind Directives - Add without affecting existing styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Utilities - Added as new layer */
+@layer utilities {
+  .perspective {
+    perspective: 1000px;
+  }
+  .transform-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  /* Enhanced version of your input-field that works with Tailwind */
+  .input-field-enhanced {
+    @apply w-full p-2.5 border border-gray-300 rounded-lg outline-none transition-all duration-300;
+  }
+  .input-field-enhanced:focus {
+    @apply border-green-500 ring-2 ring-green-200;
+  }
+}
+
+/* Animation Styles - Added as new classes */
+.page-transition {
+  position: relative;
+}
+.page-transition > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark mode support - Won't affect existing elements unless you add 'dark:' variants */
+.dark {
+  color-scheme: dark;
+}
+
+/* Custom Scrollbar - Added as new style */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* New animations - Added alongside your existing spin animation */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
