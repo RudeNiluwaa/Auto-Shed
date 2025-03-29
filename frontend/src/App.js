@@ -13,6 +13,9 @@ import Register from './Componenets/Register'
 import PassReset from './Componenets/PassReset'
 import ForgotPass from './Componenets/ForgotPass'
 import Admin from './Componenets/Admin'
+import AddSchedule from './Componenets/AddSchedule'
+import GetSchedules from './Componenets/GetSchedules';
+import UpdateReschedule from './Componenets/UpdateReschedule';
 
 function App() {
 
@@ -21,10 +24,10 @@ function App() {
 
     <BrowserRouter>
     
-    <Routes>
-    <Route path="/" element={<Login />} />
-    <Route path="/home" element={<Home />} />
-    <Route path='/admin' element={<Admin/>} />
+      <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/home" element={<Home />} />
+      <Route path='/admin' element={<Admin/>} />
       <Route path="/createpresentation" element={<CreatePresentation />} />
       <Route path="/edit/:id" element={<EditPresentation />} />
       <Route path='/add-examiner' element={<AddExaminer />} />
@@ -33,6 +36,10 @@ function App() {
       <Route path='/register' element={<Register/>} />
       <Route path='/pass-reset' element={<PassReset/>} />
       <Route path='/forgot-pass' element={<ForgotPass/>} />
+      <Route path='/add-reschedule' element={<AddSchedule />} />
+      <Route path='/get-reschedule-user' element={<GetSchedules role="user" />} />
+      <Route path='/get-reschedule-admin' element={<GetSchedules role="admin" />} />
+      <Route path='/update-reschedule/:id' element={<UpdateReschedule />} />
       
     </Routes>
     </BrowserRouter>
