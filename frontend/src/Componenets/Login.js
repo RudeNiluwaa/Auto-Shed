@@ -45,7 +45,7 @@ function Login() {
             if (res.data.role === 'admin') {
                 navigate('/admin');
             } else {
-                navigate('/');
+                navigate('/home');
             }
         } catch (err) {
             setError(err.response?.data?.msg || 'Invalid login credentials. Please try again.');

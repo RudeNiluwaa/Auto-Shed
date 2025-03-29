@@ -43,22 +43,31 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
-      {/* Premium Navbar */}
-      <nav className="bg-slate-800/70 backdrop-blur-lg p-5 rounded-xl shadow-xl border border-slate-700/50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-light text-white tracking-tight">
-            Presentation Scheduler
-          </h1>
-          <Link 
-            to="/createpresentation" 
-            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 flex items-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Presentation
-          </Link>
+<div className="bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 min-h-screen p-6">
+    {/* Navbar */}
+    <nav className="bg-white/10 backdrop-blur-lg p-4 text-white shadow-md rounded-xl">
+        <div className="container mx-auto flex justify-between items-center">
+            <h1 className="text-3xl font-bold tracking-wider">Presentation Scheduler</h1>
+            <div className="flex items-center space-x-4">
+            <Link 
+    to="/add-reschedule" 
+    className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
+  >
+    Reschedule My Presentations
+  </Link>
+  <Link 
+    to="/get-examiner-user" 
+    className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
+  >
+    Examiner List
+  </Link>
+  <Link 
+    to="/createpresentation" 
+    className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
+  >
+    + Request New Presentation
+  </Link>
+</div>
         </div>
       </nav>
 

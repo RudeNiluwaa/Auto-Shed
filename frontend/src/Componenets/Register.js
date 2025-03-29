@@ -66,7 +66,7 @@ function Register() {
         try {
             const res = await axios.post('http://localhost:8070/auth/register', formData);
             localStorage.setItem('token', res.data.token);
-            navigate('/login');
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.msg || 'Registration failed. Please try again.');
         } finally {
@@ -195,7 +195,7 @@ function Register() {
 
                 <div className="mt-6 text-center text-sm text-slate-400">
                     Already have an account?{' '}
-                    <Link to="/login" className="font-medium text-blue-400 hover:text-blue-300 transition duration-200">
+                    <Link to="/" className="font-medium text-blue-400 hover:text-blue-300 transition duration-200">
                         Sign in
                     </Link>
                 </div>

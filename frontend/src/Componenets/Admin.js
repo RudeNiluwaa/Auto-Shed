@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Admin() {
     const [presentations, setPresentations] = useState([]);
+    const navigate = useNavigate(); 
 
     useEffect(() => {
         axios.get('http://localhost:8070/auth/admin/presentations', {
@@ -24,20 +26,29 @@ function Admin() {
         .catch(err => console.error('Error updating status:', err));
     };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-            {/* Luxe Header */}
-            <div className="bg-gray-800 border-b border-gray-700">
-                <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-light text-gray-100 tracking-tight">Presentation Console</h1>
-                        <p className="mt-1 text-sm text-gray-400 font-light">Admin Control Center</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow-lg">
-                        {presentations.length} Active {presentations.length === 1 ? 'Submission' : 'Submissions'}
+    return ( 
+        <div className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700 min-h-screen">
+            {/* Navbar */}
+            <nav className="bg-blue-600 p-6 text-white shadow-lg">
+                <div className="container mx-auto flex justify-between items-center">
+                    <h1 className="text-3xl font-extrabold tracking-tight">Admin Dashboard</h1>
+                    
+                    <div className="flex space-x-4">
+                        <button
+                            onClick={() => navigate('/get-reschedule-admin')}
+                            className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
+                        >
+                            Reschedule Requests
+                        </button>
+                        <button
+                            onClick={() => navigate('/add-examiner')}
+                            className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
+                        >
+                            Add Examiner
+                        </button>
                     </div>
                 </div>
-            </div>
+            </nav>
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-8 py-10">
@@ -51,7 +62,7 @@ function Admin() {
                             </div>
                             <h3 className="text-lg font-medium text-gray-200">No presentations available</h3>
                             <p className="mt-2 text-sm text-gray-400 max-w-md mx-auto">
-                                Submitted presentations will appear here for review
+                                Submitted presentations will appear here for review.
                             </p>
                         </div>
                     ) : (
@@ -88,20 +99,14 @@ function Admin() {
                                         <div className="flex flex-shrink-0 gap-3">
                                             <button
                                                 onClick={() => updateStatus(p._id, 'Accepted')}
-                                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all duration-150 shadow-lg"
+                                                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 transition-all duration-150 shadow-lg"
                                             >
-                                                <svg className="-ml-0.5 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                </svg>
                                                 Approve
                                             </button>
                                             <button
                                                 onClick={() => updateStatus(p._id, 'Rejected')}
-                                                className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-200 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/30 transition-all duration-150 shadow-lg"
+                                                className="px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-200 bg-gray-700 hover:bg-gray-600 transition-all duration-150 shadow-lg"
                                             >
-                                                <svg className="-ml-0.5 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
                                                 Decline
                                             </button>
                                         </div>

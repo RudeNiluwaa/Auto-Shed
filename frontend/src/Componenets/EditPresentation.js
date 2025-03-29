@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 
 function EditPresentation() {
   const [formData, setFormData] = useState({
@@ -18,7 +17,7 @@ function EditPresentation() {
   
   const token = localStorage.getItem('token');
   if (!token) {
-    navigate('/login');
+    navigate('/home');
   }
 
   useEffect(() => {
@@ -62,7 +61,7 @@ function EditPresentation() {
     
     if (!formData.timeSlot.trim()) {
       newErrors.timeSlot = 'Time slot is required';
-    } else if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]/.test(formData.timeSlot)) {
+    } else if (!/^([0-24]{1,2}:[0-59]{2} (AM|PM)) - ([0-24]{1,2}:[0-59]{2} (AM|PM))$/.test(formData.timeSlot)) {
       newErrors.timeSlot = 'Please use HH:MM format';
     }
     
@@ -81,7 +80,7 @@ function EditPresentation() {
     axios.put(`http://localhost:8070/auth/presentation/${id}`, formData, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(() => navigate('/'))
+      .then(() => navigate('/home'))
       .catch(err => {
         setError(err.response?.data?.msg || 'Failed to update presentation');
         console.log(err);
@@ -124,19 +123,12 @@ function EditPresentation() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/50 border ${
-                    errors.title ? 'border-rose-500' : 'border-slate-700/70'
-                  } rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
+                  className={`w-full bg-slate-800/50 border ${errors.title ? 'border-rose-500' : 'border-slate-700/70'} rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
                   placeholder="Presentation title"
                 />
                 {errors.title && (
                   <p className="mt-1 text-sm text-rose-400">{errors.title}</p>
                 )}
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
               </div>
             </div>
 
@@ -151,19 +143,12 @@ function EditPresentation() {
                   name="presenter"
                   value={formData.presenter}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/50 border ${
-                    errors.presenter ? 'border-rose-500' : 'border-slate-700/70'
-                  } rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
+                  className={`w-full bg-slate-800/50 border ${errors.presenter ? 'border-rose-500' : 'border-slate-700/70'} rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
                   placeholder="Presenter name"
                 />
                 {errors.presenter && (
                   <p className="mt-1 text-sm text-rose-400">{errors.presenter}</p>
                 )}
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
               </div>
             </div>
 
@@ -178,19 +163,12 @@ function EditPresentation() {
                   name="timeSlot"
                   value={formData.timeSlot}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/50 border ${
-                    errors.timeSlot ? 'border-rose-500' : 'border-slate-700/70'
-                  } rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
+                  className={`w-full bg-slate-800/50 border ${errors.timeSlot ? 'border-rose-500' : 'border-slate-700/70'} rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200`}
                   placeholder="14:30"
                 />
                 {errors.timeSlot && (
                   <p className="mt-1 text-sm text-rose-400">{errors.timeSlot}</p>
                 )}
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
               </div>
             </div>
           </div>
@@ -200,9 +178,7 @@ function EditPresentation() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition duration-300 flex items-center ${
-                isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+              className={`px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition duration-300 flex items-center ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? (
                 <>
@@ -214,9 +190,7 @@ function EditPresentation() {
                 </>
               ) : (
                 <>
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">
-                    Update Presentation
-                  </span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Update Presentation</span>
                   <svg className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
@@ -225,7 +199,7 @@ function EditPresentation() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className="px-6 py-2.5 border border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white font-medium rounded-lg transition-all duration-300"
             >
               Cancel

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export default function DisplayReschedule() {
+export default function GetSchedules({ role }) {
   const [reschedules, setReschedules] = useState([]);
   const navigate = useNavigate();
 
@@ -37,38 +37,42 @@ export default function DisplayReschedule() {
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-gray-50">
-      <div className="w-full h-full overflow-auto p-0 bg-white shadow-md border border-gray-300">
+    <div className="flex justify-center items-start min-h-screen bg-cover bg-center bg-fixed p-0 m-0" 
+     style={{ backgroundImage: 'url(/images/work2.jpg)' }}>
+      <div className="w-full max-w-full overflow-auto bg-white/80 shadow-md border border-gray-300 mt-4 p-4">
         <h2 className="text-center text-2xl font-semibold text-gray-800 py-4">Reschedule Details</h2>
 
-        <div className="text-right p-4">
-          <button
-            onClick={handleAddSchedule}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add Schedule
-          </button>
-        </div>
+      <div className="text-right mb-4">
+              {role === "user" && (
+                <button
+                  onClick={handleAddSchedule}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Add Schedule
+                </button>
+        )}
+      </div>
 
-        <div className="overflow-x-auto h-full">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-300 p-2">User ID</th>
-                <th className="border border-gray-300 p-2">Examiner ID</th>
-                <th className="border border-gray-300 p-2">Module Code</th>
-                <th className="border border-gray-300 p-2">Current Date</th>
-                <th className="border border-gray-300 p-2">Requested Date</th>
-                <th className="border border-gray-300 p-2">Current Time</th>
-                <th className="border border-gray-300 p-2">Requested Time</th>
-                <th className="border border-gray-300 p-2">Current Venue</th>
-                <th className="border border-gray-300 p-2">Requested Venue</th>
-                <th className="border border-gray-300 p-2">Actions</th>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300 bg-white shadow-md">
+            <thead className="bg-gray-300 text-gray-800">
+              <tr>
+                <th className="border border-gray-400 p-2">User ID</th>
+                <th className="border border-gray-400 p-2">Examiner ID</th>
+                <th className="border border-gray-400 p-2">Module Code</th>
+                <th className="border border-gray-400 p-2">Current Date</th>
+                <th className="border border-gray-400 p-2">Requested Date</th>
+                <th className="border border-gray-400 p-2">Current Time</th>
+                <th className="border border-gray-400 p-2">Requested Time</th>
+                <th className="border border-gray-400 p-2">Current Venue</th>
+                <th className="border border-gray-400 p-2">Requested Venue</th>
+                {role === "admin" && <th className="border border-gray-400 p-2">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {reschedules.map((reschedule) => (
-                <tr key={reschedule._id} className="text-center border-b border-gray-300">
+                <tr key={reschedule._id} className="text-center border-b border-gray-300 bg-white">
                   <td className="border border-gray-300 p-2">{reschedule.userId}</td>
                   <td className="border border-gray-300 p-2">{reschedule.examinerId}</td>
                   <td className="border border-gray-300 p-2">{reschedule.module_code}</td>
@@ -78,20 +82,22 @@ export default function DisplayReschedule() {
                   <td className="border border-gray-300 p-2">{reschedule.req_time}</td>
                   <td className="border border-gray-300 p-2">{reschedule.current_venue}</td>
                   <td className="border border-gray-300 p-2">{reschedule.req_venue}</td>
-                  <td className="border border-gray-300 p-2 flex justify-center gap-2">
-                    <button
-                      onClick={() => handleUpdate(reschedule._id)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                    >
-                      Update
-                    </button>
-                    <button
-                      onClick={() => handleDelete(reschedule._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {role === "admin" && (
+                    <td className="border border-gray-300 p-2 flex justify-center gap-2">
+                      <button
+                        onClick={() => handleUpdate(reschedule._id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => handleDelete(reschedule._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
