@@ -50,7 +50,7 @@ export default function AddExaminer() {
     .then(() => {
       alert("New examiner added successfully");
       setName(""); setId(""); setCode(""); setAvailability(""); setDate("");
-      navigate("/get-examiner"); 
+      navigate("/get-examiner-admin"); 
     })
     .catch(err => {
       alert("Failed to add new examiner: " + (err.response?.data?.message || "Unknown error"));
@@ -118,7 +118,7 @@ export default function AddExaminer() {
 
         <button 
           type="button" 
-          onClick={() => navigate("/get-examiner")} 
+          onClick={() => navigate("/get-examiner-admin")} 
           className="w-full mt-4 p-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-900 transition duration-200 shadow"
         >
           More Info

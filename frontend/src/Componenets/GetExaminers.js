@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-export default function ExaminerList() {
+export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentExaminer, setCurrentExaminer] = useState({
@@ -90,9 +90,11 @@ export default function ExaminerList() {
           <table className="min-w-full bg-white text-black rounded-xl overflow-hidden">
             <thead className="bg-blue-700 text-white">
               <tr>
-                {["Name", "ID", "Module", "Availability", "Date", "Actions"].map(head => (
+                {["Name", "ID", "Module", "Availability", "Date"].map(head => (
                   <th key={head} className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">{head}</th>
                 ))}
+                {/* Conditionally render "Actions" column for admin role */}
+                {role === 'admin' && <th className="px-6 py-3 text-sm font-semibold uppercase border border-gray-200">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -103,10 +105,13 @@ export default function ExaminerList() {
                   <td className="px-4 py-2 border border-gray-300">{examiner.moduleCode}</td>
                   <td className="px-4 py-2 border border-gray-300">{examiner.availability}</td>
                   <td className="px-4 py-2 border border-gray-300">{examiner.date}</td>
-                  <td className="px-4 py-2 border border-gray-300 space-x-2">
-                    <button onClick={() => handleUpdate(examiner.examinerId)} className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md transition">Update</button>
-                    <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded-md transition">Delete</button>
-                  </td>
+                  {/* Conditionally render "Actions" buttons for admin role */}
+                  {role === 'admin' && (
+                    <td className="px-4 py-2 border border-gray-300 space-x-2">
+                      <button onClick={() => handleUpdate(examiner.examinerId)} className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md transition">Update</button>
+                      <button onClick={() => handleDelete(examiner.examinerId, examiner._id)} className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded-md transition">Delete</button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -139,10 +144,16 @@ export default function ExaminerList() {
         )}
 
         <div className="mt-12 text-center">
-          <button onClick={() => navigate('/add-examiner')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200">
-            Add Examiner
-          </button>
+          {role === 'admin' && (
+            <button 
+              onClick={() => navigate('/add-examiner')} 
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+            >
+              Add Examiner
+            </button>
+          )}
         </div>
+
       </div>
     </div>
   );

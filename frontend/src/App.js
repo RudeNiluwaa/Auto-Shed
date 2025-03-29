@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './App.css';
 
@@ -14,20 +14,22 @@ import PassReset from './Componenets/PassReset'
 import ForgotPass from './Componenets/ForgotPass'
 import Admin from './Componenets/Admin'
 
-
 function App() {
+
+  const [role, setRole] = useState("user")
   return (
 
     <BrowserRouter>
     
     <Routes>
-    <Route path="/" element={<Home />} />
+    <Route path="/" element={<Login />} />
+    <Route path="/home" element={<Home />} />
     <Route path='/admin' element={<Admin/>} />
       <Route path="/createpresentation" element={<CreatePresentation />} />
       <Route path="/edit/:id" element={<EditPresentation />} />
       <Route path='/add-examiner' element={<AddExaminer />} />
-      <Route path='/get-examiner' element={<GetExaminers />} />
-      <Route path='/login' element={<Login/>} />
+      <Route path='/get-examiner-user' element={<GetExaminers role="user" />} />
+      <Route path='/get-examiner-admin' element={<GetExaminers role="admin" />} />
       <Route path='/register' element={<Register/>} />
       <Route path='/pass-reset' element={<PassReset/>} />
       <Route path='/forgot-pass' element={<ForgotPass/>} />
