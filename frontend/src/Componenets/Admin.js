@@ -27,19 +27,30 @@ function Admin() {
         .catch(err => console.error('Error updating status:', err));
     };
 
-    return (
+    return ( 
         <div className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700 min-h-screen">
-        <nav className="bg-blue-600 p-6 text-white shadow-lg">
+          <nav className="bg-blue-600 p-6 text-white shadow-lg">
             <div className="container mx-auto flex justify-between items-center">
-                <h1 className="text-3xl font-extrabold tracking-tight">Admin Dashboard</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">Admin Dashboard</h1>
+              
+              {/* Buttons grouped in a flex container */}
+              <div className="flex space-x-4">
                 <button
-            onClick={() => navigate('/add-examiner')}
-            className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
-          >
-            Add Examiner
-          </button>
+                  onClick={() => navigate('/get-reschedule-admin')}
+                  className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
+                >
+                  Reschedule Requests
+                </button>
+                <button
+                  onClick={() => navigate('/add-examiner')}
+                  className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
+                >
+                  Add Examiner
+                </button>
+              </div>
             </div>
-        </nav>
+          </nav>
+      
     
         <div className="container mx-auto mt-10 p-8 bg-white rounded-3xl shadow-xl">
             <h2 className="text-3xl font-semibold mb-8 text-gray-800">All Presentations</h2>

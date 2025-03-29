@@ -49,6 +49,12 @@ function Home() {
         <div className="container mx-auto flex justify-between items-center">
             <h1 className="text-3xl font-bold tracking-wider">Presentation Scheduler</h1>
             <div className="flex items-center space-x-4">
+            <Link 
+    to="/add-reschedule" 
+    className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
+  >
+    Reschedule My Presentations
+  </Link>
   <Link 
     to="/get-examiner-user" 
     className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
@@ -59,7 +65,7 @@ function Home() {
     to="/createpresentation" 
     className="bg-black text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-500 hover:text-black transition-all duration-300"
   >
-    + Request Presentation
+    + Request New Presentation
   </Link>
 </div>
         </div>
