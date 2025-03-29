@@ -16,6 +16,10 @@ import AIDashboard from './Componenets/AIDashboard';
 import SmartTimeAllocation from './Componenets/SmartTimeAllocation';
 import ConflictResolution from './Componenets/ConflictResolution';
 import PerformanceAnalytics from './Componenets/PerformanceAnalytics';
+import AddSchedule from './Componenets/AddSchedule';
+import GetSchedules from './Componenets/GetSchedules';
+import UpdateReschedule from './Componenets/UpdateReschedule';
+
 
 const PageLayout = ({ children }) => (
   <motion.div
@@ -34,15 +38,20 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageLayout><Home /></PageLayout>} />
+        <Route path="/" element={<PageLayout><Login /></PageLayout>} />
+        <Route path="/home" element={<PageLayout><Home /></PageLayout>} />
         <Route path="/admin" element={<PageLayout><Admin /></PageLayout>} />
         <Route path="/createpresentation" element={<PageLayout><CreatePresentation /></PageLayout>} />
         <Route path="/edit/:id" element={<PageLayout><EditPresentation /></PageLayout>} />
         <Route path="/add-examiner" element={<PageLayout><AddExaminer /></PageLayout>} />
-        <Route path="/get-examiner" element={<PageLayout><GetExaminers /></PageLayout>} />
-        <Route path="/login" element={<PageLayout><Login /></PageLayout>} />
+        <Route path="/get-examiner-user" element={<PageLayout><GetExaminers role="user" /></PageLayout>} />
+        <Route path="/get-examiner-admin" element={<PageLayout><GetExaminers role="admin" /></PageLayout>} />
         <Route path="/register" element={<PageLayout><Register /></PageLayout>} />
         <Route path="/pass-reset" element={<PageLayout><PassReset /></PageLayout>} />
+        <Route path='/add-reschedule' element={<AddSchedule />} />
+        <Route path='/get-reschedule-user' element={<GetSchedules role="user" />} />
+        <Route path='/get-reschedule-admin' element={<GetSchedules role="admin" />} />
+        <Route path='/update-reschedule/:id' element={<UpdateReschedule />} />
         <Route path="/forgot-pass" element={<PageLayout><ForgotPass /></PageLayout>} />
         <Route path="/ai-dashboard" element={<PageLayout><AIDashboard /></PageLayout>} />
         <Route path="/smart-time-allocation" element={<PageLayout><SmartTimeAllocation /></PageLayout>} />
