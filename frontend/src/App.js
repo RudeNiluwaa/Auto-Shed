@@ -1,4 +1,5 @@
 import React from 'react';
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
@@ -36,6 +37,8 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
+    <div>
+    <Toaster position='top-center'/>
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageLayout><Login /></PageLayout>} />
@@ -59,6 +62,7 @@ const AnimatedRoutes = () => {
         <Route path="/performance-analytics" element={<PageLayout><PerformanceAnalytics /></PageLayout>} />
       </Routes>
     </AnimatePresence>
+    </div>
   );
 };
 

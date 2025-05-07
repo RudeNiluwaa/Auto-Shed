@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Presentation from '../models/Presentation.js';
+import Examiner from '../models/examiner.models.js';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import express from 'express';
@@ -316,12 +317,28 @@ function verifyToken(req, res, next) {
 
 router.post('/create', verifyToken, async (req, res) => {
     try {
-        const { title, presenter, timeSlot } = req.body;
+        const { title, presenter, timeSlot, date, examinerId } = req.body; 
         const userId = req.userId;
-        const presentation = new Presentation({ title, presenter, timeSlot, user: userId });
+
+        const examiner = await Examiner.findById(examinerId);
+        if (!examiner) {
+            return res.status(404).json({ msg: 'Examiner not found' });
+        }
+
+        const presentation = new Presentation({ 
+            title, 
+            presenter, 
+            timeSlot, 
+            date, 
+            user: userId,
+            examiner: examiner._id,
+            moduleCode: examiner.moduleCode
+        });
+
         await presentation.save();
         res.json({ msg: 'Presentation created successfully' });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: 'Server error' });
     }
 });

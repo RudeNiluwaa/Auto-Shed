@@ -1,39 +1,54 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const CreatePresentation = () => {
-    // All state and logic remains EXACTLY the same
     const [title, setTitle] = useState('');
     const [presenter, setPresenter] = useState('');
-    const [timeSlot, setTimeSlot] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [date, setDate] = useState('');
+    const [examinerId, setExaminerId] = useState('');
+    const [moduleCode, setModuleCode] = useState('');
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    const formatTo12Hour = (time24) => {
+        const [hour, minute] = time24.split(':');
+        const hourNum = parseInt(hour, 10);
+        const ampm = hourNum >= 12 ? 'PM' : 'AM';
+        const hour12 = hourNum % 12 || 12;
+        return `${hour12}:${minute} ${ampm}`;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!title || !presenter || !timeSlot) {
+        setError('');
+        setSuccessMessage('');
+
+        if (!title || !presenter || !startTime || !endTime || !date || !examinerId || !moduleCode) {
             setError('All fields are required');
             return;
         }
-        
-        // Regular expression for time slot format (e.g., "10:00 AM - 11:00 AM")
-        const timeSlotRegex = /^([0-24]{1,2}:[0-59]{2} (AM|PM)) - ([0-24]{1,2}:[0-59]{2} (AM|PM))$/;
-        if (!timeSlotRegex.test(timeSlot)) {
-            setError('Time slot must be in the format "HH:MM AM/PM - HH:MM AM/PM"');
-            return;
-        }
 
+        const timeSlotFormatted = `${formatTo12Hour(startTime)} - ${formatTo12Hour(endTime)}`;
         const token = localStorage.getItem('token');
+
         try {
             await axios.post(
-                'http://localhost:8070/auth/create', 
-                { title, presenter, timeSlot },
+                'http://localhost:8070/auth/create',
+                { title, presenter, timeSlot: timeSlotFormatted, date, examinerId, moduleCode },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
             setSuccessMessage('Presentation created successfully');
+            toast.success('Your presentation has been created successfully.');
             setTitle('');
             setPresenter('');
-            setTimeSlot('');
+            setStartTime('');
+            setEndTime('');
+            setDate('');
+            setExaminerId('');
+            setModuleCode('');
         } catch (err) {
             setError(err.response ? err.response.data.msg : 'Server error');
         }
@@ -41,17 +56,12 @@ const CreatePresentation = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
-            {/* Premium Glass Card */}
             <div className="w-full max-w-md bg-slate-800/40 backdrop-blur-lg rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl">
-                {/* Gradient Header Bar */}
                 <div className="bg-gradient-to-r from-blue-600/80 to-indigo-600/80 p-5">
-                    <h2 className="text-2xl font-light text-white tracking-wide text-center">
-                        New Presentation
-                    </h2>
+                    <h2 className="text-2xl font-light text-white tracking-wide text-center">New Presentation</h2>
                 </div>
 
                 <div className="p-8">
-                    {/* Status Messages */}
                     {error && (
                         <div className="mb-6 p-3 bg-rose-900/30 text-rose-300 rounded-lg border border-rose-800/50 flex items-center">
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,77 +80,87 @@ const CreatePresentation = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Input Group */}
                         <div className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                    Presentation Title
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-800/50 border border-slate-700/70 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 transition-all duration-200"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        placeholder="Enter presentation title"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Presentation Title</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Enter title"
+                                />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                    Presenter Name
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-800/50 border border-slate-700/70 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 transition-all duration-200"
-                                        value={presenter}
-                                        onChange={(e) => setPresenter(e.target.value)}
-                                        placeholder="Enter presenter's name"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Presenter Name</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    value={presenter}
+                                    onChange={(e) => setPresenter(e.target.value)}
+                                    placeholder="Enter presenter"
+                                />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">
-                                    Time Slot
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-800/50 border border-slate-700/70 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 transition-all duration-200"
-                                        value={timeSlot}
-                                        onChange={(e) => setTimeSlot(e.target.value)}
-                                        placeholder="e.g., 10:00 AM - 11:00 AM"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg className="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Examiner ID</label>
+                                <input
+                                    type="text"
+                                    placeholder="E1234"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    value={examinerId}
+                                    onChange={(e) => setExaminerId(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Module Code</label>
+                                <input
+                                    type="text"
+                                    placeholder="IT1234"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    value={moduleCode}
+                                    onChange={(e) => setModuleCode(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Date</label>
+                                <input
+                                    type="date"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Start Time</label>
+                                <input
+                                    type="time"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">End Time</label>
+                                <input
+                                    type="time"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                />
                             </div>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center group"
+                            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg flex items-center justify-center group"
                         >
-                            <span className="group-hover:translate-x-1 transition-transform duration-300">
-                                Create Presentation
-                            </span>
+                            <span className="group-hover:translate-x-1 transition-transform duration-300">Create Presentation</span>
                             <svg className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
