@@ -1,6 +1,70 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+
+// PDF Styles
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  table: {
+    display: 'table',
+    width: 'auto',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#bfbfbf',
+  },
+  tableRow: {
+    flexDirection: 'row',
+  },
+  tableCol: {
+    width: '20%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#bfbfbf',
+    padding: 5,
+  },
+  tableCell: {
+    fontSize: 10,
+  },
+  header: {
+    backgroundColor: '#f0f0f0',
+    fontWeight: 'bold',
+  },
+});
+
+// PDF Document Component
+const ExaminerPDF = ({ examiners }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.title}>Examiners Report</Text>
+      <View style={styles.table}>
+        <View style={[styles.tableRow, styles.header]}>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Name</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>ID</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Module</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Availability</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Date</Text></View>
+        </View>
+        {examiners.map((examiner, index) => (
+          <View key={index} style={styles.tableRow}>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerName}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerId}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.moduleCode}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.availability}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.date}</Text></View>
+          </View>
+        ))}
+      </View>
+    </Page>
+  </Document>
+);
 
 export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
@@ -106,6 +170,23 @@ export default function ExaminerList({ role }) {
     setCurrentExaminer(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const blob = await pdf(<ExaminerPDF examiners={filteredExaminers} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `examiners-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 text-white p-8 font-sans">
       <div className="max-w-6xl mx-auto">
@@ -131,6 +212,13 @@ export default function ExaminerList({ role }) {
               placeholder={`Search by ${searchType}...`}
               className="w-full md:w-96 bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-white/50"
             />
+            {/* PDF Download Button */}
+            <button
+              onClick={handleDownloadPDF}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+            >
+              Download PDF
+            </button>
           </div>
         </div>
 
