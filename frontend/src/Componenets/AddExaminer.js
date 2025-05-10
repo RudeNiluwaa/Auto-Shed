@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function AddExaminer() {
   const [examinerName, setName] = useState("");
@@ -38,27 +39,69 @@ export default function AddExaminer() {
     return Object.keys(errors).length === 0; 
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     const newExaminer = { examinerName, examinerId, moduleCode, availability, date };
 
-    axios.post("http://localhost:8070/examiner/create", newExaminer, {
-      headers: { "Content-Type": "application/json" },
-    })
-    .then(() => {
-      alert("New examiner added successfully");
-      setName(""); setId(""); setCode(""); setAvailability(""); setDate("");
-      navigate("/get-examiner-admin"); 
-    })
-    .catch(err => {
-      alert("Failed to add new examiner: " + (err.response?.data?.message || "Unknown error"));
-    });
+    try {
+      const response = await axios.post("http://localhost:8070/examiner/create", newExaminer, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.status === 200) {
+        toast.success('Examiner added successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#4CAF50',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
+
+        // Clear form
+        setName("");
+        setId("");
+        setCode("");
+        setAvailability("");
+        setDate("");
+
+        // Navigate after a short delay to show the success message
+        setTimeout(() => {
+          navigate("/get-examiner-admin");
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Error adding examiner:', err);
+      let errorMessage = 'Failed to add new examiner. ';
+      
+      if (err.response) {
+        errorMessage += err.response.data?.message || `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage += 'No response from server. Please check your connection.';
+      } else {
+        errorMessage += err.message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#f44336',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
+    }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-950 to-blue-800">
+      <Toaster />
       <form 
         onSubmit={handleSubmit} 
         className="w-full max-w-lg p-8 bg-white shadow-2xl rounded-2xl border border-gray-200"
