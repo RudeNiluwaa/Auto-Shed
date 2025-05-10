@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import toast, { Toaster } from 'react-hot-toast';
 
 // PDF Styles
 const styles = StyleSheet.create({
@@ -119,13 +120,37 @@ export default function ExaminerList({ role }) {
     axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
       .then(() => {
         setExaminers(prev => prev.filter(e => e._id !== mongoId));
-        alert('Examiner deleted successfully');
+        toast.success('Examiner deleted successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#4CAF50',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
       })
-      .catch(() => alert('Failed to delete examiner'));
+      .catch(() => {
+        toast.error('Failed to delete examiner', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#f44336',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
+      });
   };
 
   const handleUpdate = (examinerId) => {
     const examiner = examiners.find(e => e.examinerId === examinerId);
+    if (!examiner) {
+      toast.error('Examiner not found');
+      return;
+    }
     setCurrentExaminer(examiner);
     setErrors({});
     setIsEditing(true);
@@ -157,17 +182,63 @@ export default function ExaminerList({ role }) {
     return Object.keys(errors).length === 0;
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer)
-      .then(() => {
+    try {
+      // First check if the examiner still exists
+      const checkResponse = await axios.get(`http://localhost:8070/examiner/get/${currentExaminer._id}`);
+      if (!checkResponse.data) {
+        toast.error('Examiner no longer exists');
+        setIsEditing(false);
+        return;
+      }
+
+      const response = await axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer);
+      
+      if (response.status === 200) {
+        // Update the local state
         setExaminers(prev => prev.map(e => e._id === currentExaminer._id ? currentExaminer : e));
         setIsEditing(false);
-        alert('Examiner updated successfully');
-      })
-      .catch(() => alert('Failed to update examiner'));
+        toast.success('Examiner updated successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#4CAF50',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      let errorMessage = 'Failed to update examiner. ';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        errorMessage += error.response.data?.message || `Server responded with ${error.response.status}`;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += 'No response from server. Please check your connection.';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage += error.message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#f44336',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -194,6 +265,7 @@ export default function ExaminerList({ role }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 text-white p-8 font-sans">
+      <Toaster />
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
 
