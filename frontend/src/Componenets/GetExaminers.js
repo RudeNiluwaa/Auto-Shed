@@ -1,9 +1,82 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import toast, { Toaster } from 'react-hot-toast';
+
+// PDF Styles
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+    backgroundColor: '#1E40AF', // Darker blue background
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#FFFFFF', // White color for title
+    fontWeight: 'bold',
+  },
+  table: {
+    display: 'table',
+    width: 'auto',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#bfbfbf',
+    backgroundColor: '#FFFFFF', // White background for table
+  },
+  tableRow: {
+    flexDirection: 'row',
+  },
+  tableCol: {
+    width: '20%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#bfbfbf',
+    padding: 5,
+  },
+  tableCell: {
+    fontSize: 10,
+    color: '#1E3A8A', // Dark blue color for text
+  },
+  header: {
+    backgroundColor: '#3B82F6', // Medium blue for header
+    fontWeight: 'bold',
+  },
+});
+
+// PDF Document Component
+const ExaminerPDF = ({ examiners }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.title}>Examiner Details</Text>
+      <View style={styles.table}>
+        <View style={[styles.tableRow, styles.header]}>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Name</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>ID</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Module</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Availability</Text></View>
+          <View style={styles.tableCol}><Text style={styles.tableCell}>Date</Text></View>
+        </View>
+        {examiners.map((examiner, index) => (
+          <View key={index} style={styles.tableRow}>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerName}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerId}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.moduleCode}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.availability}</Text></View>
+            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.date}</Text></View>
+          </View>
+        ))}
+      </View>
+    </Page>
+  </Document>
+);
 
 export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
+  const [filteredExaminers, setFilteredExaminers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('name'); // name, id, module, date
   const [isEditing, setIsEditing] = useState(false);
   const [currentExaminer, setCurrentExaminer] = useState({
     examinerName: '',
@@ -17,21 +90,67 @@ export default function ExaminerList({ role }) {
 
   useEffect(() => {
     axios.get('http://localhost:8070/examiner/')
-      .then(response => setExaminers(response.data))
+      .then(response => {
+        setExaminers(response.data);
+        setFilteredExaminers(response.data);
+      })
       .catch(error => console.error("Error fetching data:", error));
   }, []);
+
+  useEffect(() => {
+    const filtered = examiners.filter(examiner => {
+      const searchValue = searchTerm.toLowerCase();
+      switch(searchType) {
+        case 'name':
+          return examiner.examinerName.toLowerCase().includes(searchValue);
+        case 'id':
+          return examiner.examinerId.toLowerCase().includes(searchValue);
+        case 'module':
+          return examiner.moduleCode.toLowerCase().includes(searchValue);
+        case 'date':
+          return examiner.date.includes(searchValue);
+        default:
+          return true;
+      }
+    });
+    setFilteredExaminers(filtered);
+  }, [searchTerm, searchType, examiners]);
 
   const handleDelete = (examinerId, mongoId) => {
     axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
       .then(() => {
         setExaminers(prev => prev.filter(e => e._id !== mongoId));
-        alert('Examiner deleted successfully');
+        toast.success('Examiner deleted successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#4CAF50',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
       })
-      .catch(() => alert('Failed to delete examiner'));
+      .catch(() => {
+        toast.error('Failed to delete examiner', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#f44336',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
+      });
   };
 
   const handleUpdate = (examinerId) => {
     const examiner = examiners.find(e => e.examinerId === examinerId);
+    if (!examiner) {
+      toast.error('Examiner not found');
+      return;
+    }
     setCurrentExaminer(examiner);
     setErrors({});
     setIsEditing(true);
@@ -63,17 +182,63 @@ export default function ExaminerList({ role }) {
     return Object.keys(errors).length === 0;
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer)
-      .then(() => {
+    try {
+      // First check if the examiner still exists
+      const checkResponse = await axios.get(`http://localhost:8070/examiner/get/${currentExaminer._id}`);
+      if (!checkResponse.data) {
+        toast.error('Examiner no longer exists');
+        setIsEditing(false);
+        return;
+      }
+
+      const response = await axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer);
+      
+      if (response.status === 200) {
+        // Update the local state
         setExaminers(prev => prev.map(e => e._id === currentExaminer._id ? currentExaminer : e));
         setIsEditing(false);
-        alert('Examiner updated successfully');
-      })
-      .catch(() => alert('Failed to update examiner'));
+        toast.success('Examiner updated successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#4CAF50',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      let errorMessage = 'Failed to update examiner. ';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        errorMessage += error.response.data?.message || `Server responded with ${error.response.status}`;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage += 'No response from server. Please check your connection.';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage += error.message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#f44336',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -81,15 +246,63 @@ export default function ExaminerList({ role }) {
     setCurrentExaminer(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const blob = await pdf(<ExaminerPDF examiners={filteredExaminers} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `examiners-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 text-white p-8 font-sans">
+      <Toaster />
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
+
+        {/* Search Bar */}
+        <div className="mb-8 bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="name">Search by Name</option>
+              <option value="id">Search by ID</option>
+              <option value="module">Search by Module</option>
+              <option value="date">Search by Date</option>
+            </select>
+            <input
+              type={searchType === 'date' ? 'date' : 'text'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={`Search by ${searchType}...`}
+              className="w-full md:w-96 bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-white/50"
+            />
+            {/* PDF Download Button */}
+            <button
+              onClick={handleDownloadPDF}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
 
         {/* ✅ User View: Cards */}
         {role !== 'admin' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {examiners.map((examiner) => (
+            {filteredExaminers.map((examiner) => (
               <div
                 key={examiner._id}
                 className="bg-white text-black rounded-2xl shadow-xl p-6 transition-all hover:shadow-2xl hover:scale-105 duration-300"
@@ -115,7 +328,7 @@ export default function ExaminerList({ role }) {
                 </tr>
               </thead>
               <tbody>
-                {examiners.map(examiner => (
+                {filteredExaminers.map(examiner => (
                   <tr key={examiner.examinerId} className="even:bg-gray-100">
                     <td className="px-4 py-2 border border-gray-300">{examiner.examinerName}</td>
                     <td className="px-4 py-2 border border-gray-300">{examiner.examinerId}</td>

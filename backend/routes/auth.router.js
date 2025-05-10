@@ -147,7 +147,7 @@ router.post('/reset-password/:token', async (req, res) => {
 
 router.get('/admin/presentations', auth, async (req, res) => {
     try {
-        const presentations = await Presentation.find().populate('examiner'); // Find all presentations in the database
+        const presentations = await Presentation.find(); // Find all presentations in the database
         res.json(presentations); // Send them as the response
     } catch (err) {
         console.error(err.message);
@@ -219,7 +219,7 @@ router.put('/admin/presentation/status/:id', async (req, res) => {
 // Read all scheduled presentations
 router.get('/presentations', auth, async (req, res) => {
     try {
-        const presentations = await Presentation.find({ user: req.user.id });
+        const presentations = await Presentation.find({ user: req.user.id }); // Fetch presentations for the logged-in user
         res.json(presentations);
     } catch (err) {
         console.error(err.message);
@@ -320,7 +320,7 @@ router.post('/create', verifyToken, async (req, res) => {
         const { title, presenter, timeSlot, date, examinerId } = req.body; 
         const userId = req.userId;
 
-        const examiner = await Examiner.findOne({ examinerId: req.body.examinerId });
+        const examiner = await Examiner.findById(examinerId);
         if (!examiner) {
             return res.status(404).json({ msg: 'Examiner not found' });
         }
