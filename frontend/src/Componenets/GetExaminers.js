@@ -7,11 +7,14 @@ import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from '@r
 const styles = StyleSheet.create({
   page: {
     padding: 30,
+    backgroundColor: '#1E40AF', // Darker blue background
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
     textAlign: 'center',
+    color: '#FFFFFF', // White color for title
+    fontWeight: 'bold',
   },
   table: {
     display: 'table',
@@ -19,6 +22,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: '#bfbfbf',
+    backgroundColor: '#FFFFFF', // White background for table
   },
   tableRow: {
     flexDirection: 'row',
@@ -32,9 +36,10 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 10,
+    color: '#1E3A8A', // Dark blue color for text
   },
   header: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#3B82F6', // Medium blue for header
     fontWeight: 'bold',
   },
 });
@@ -43,7 +48,7 @@ const styles = StyleSheet.create({
 const ExaminerPDF = ({ examiners }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <Text style={styles.title}>Examiners Report</Text>
+      <Text style={styles.title}>Examiner Details</Text>
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.header]}>
           <View style={styles.tableCol}><Text style={styles.tableCell}>Name</Text></View>
