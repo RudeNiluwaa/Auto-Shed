@@ -1,86 +1,303 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import Swal from 'sweetalert2';
+
+// Register fonts - fix for webpack bundling
+pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
 
 function Admin() {
     const [presentations, setPresentations] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost:8070/auth/admin/presentations', {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        .then(res => setPresentations(res.data))
-        .catch(err => console.error('Error fetching presentations:', err));
+        const fetchPresentations = async () => {
+            try {
+                const result = await Swal.fire({
+                    title: 'Loading Data',
+                    html: 'Fetching presentations...',
+                    allowOutsideClick: false,
+                    background: '#1e293b',
+                    color: '#e2e8f0',
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const res = await axios.get('http://localhost:8070/auth/admin/presentations', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                
+                setPresentations(res.data);
+                setIsLoading(false);
+                
+                if (result.isDismissed) {
+                    Swal.close();
+                }
+            } catch (err) {
+                setIsLoading(false);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to Load',
+                    text: 'Could not fetch presentations. Please try again later.',
+                    background: '#1e293b',
+                    color: '#e2e8f0',
+                    confirmButtonColor: '#4f46e5'
+                });
+                console.error('Error fetching presentations:', err);
+            }
+        };
+
+        fetchPresentations();
     }, []);
 
-    const updateStatus = (id, newStatus) => {
-        axios.put(`http://localhost:8070/auth/admin/presentation/status/${id}`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-        .then(() => {
+    const updateStatus = async (id, newStatus) => {
+        const result = await Swal.fire({
+            title: 'Confirm Action',
+            text: `Are you sure you want to ${newStatus.toLowerCase()} this presentation?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: newStatus === 'Accepted' ? '#10B981' : '#F43F5E',
+            cancelButtonColor: '#64748b',
+            background: '#1e293b',
+            color: '#e2e8f0',
+            confirmButtonText: `Yes, ${newStatus.toLowerCase()} it!`
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await axios.put(
+                `http://localhost:8070/auth/admin/presentation/status/${id}`,
+                { status: newStatus },
+                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+            );
+
             setPresentations(prev => prev.map(p =>
                 p._id === id ? { ...p, status: newStatus } : p
             ));
-        })
-        .catch(err => console.error('Error updating status:', err));
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Status Updated!',
+                text: `Presentation has been ${newStatus.toLowerCase()}.`,
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5',
+                timer: 2000
+            });
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: 'Failed to update presentation status. Please try again.',
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5'
+            });
+            console.error('Error updating status:', err);
+        }
     };
 
     const generateReport = () => {
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text('Presentation Report', 14, 20);  // Title of the document
-    
-        const tableColumn = ['Title', 'Presenter', 'Time Slot', 'Examiner ID', 'Module Code', 'Date', 'Status'];
-        const tableRows = [];
-    
-        // Prepare data for the table rows
-        presentations.forEach(p => {
-            const rowData = [
-                p.title || '',
-                p.presenter || '',
-                p.timeSlot || '',
-                p.examiner?.examinerId || 'N/A',
-                p.examiner?.moduleCode || 'N/A',
-                new Date(p.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-                p.status
-            ];
-            tableRows.push(rowData);
-        });
-    
-        const startY = 30; // Starting vertical position for the table (below the title)
-        const rowHeight = 14; // Increased row height for more space
-        const columnWidth = 40; // Increased column width for more room
-        const marginLeft = 14; // Left margin for the text
-    
-        // Draw the table headers with more space after the title
-        doc.setFontSize(12);
-        tableColumn.forEach((header, index) => {
-            const x = marginLeft + index * columnWidth; // Horizontal position of the header
-            doc.text(header, x, startY);
-        });
-    
-        // Draw a horizontal line after the headers
-        doc.setLineWidth(0.5);
-        doc.line(marginLeft, startY + 3, marginLeft + columnWidth * tableColumn.length, startY + 3);
-    
-        // Draw the table rows
-        let rowY = startY + rowHeight + 6; // Increased space between rows
-        tableRows.forEach(row => {
-            row.forEach((cell, index) => {
-                const x = marginLeft + index * columnWidth; // Horizontal position for each cell
-                doc.text(cell, x, rowY); // Add cell content to the row
+        if (presentations.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Data',
+                text: 'There are no presentations to generate a report.',
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5'
             });
-            rowY += rowHeight + 8; // Increased space between rows
+            return;
+        }
+
+        Swal.fire({
+            title: 'Generating Report',
+            html: 'Please wait while we prepare your PDF...',
+            allowOutsideClick: false,
+            background: '#1e293b',
+            color: '#e2e8f0',
+            didOpen: async () => {
+                Swal.showLoading();
+                
+                try {
+                    // Format data for the PDF
+                    const tableBody = presentations.map(p => [
+                        p.title || '',
+                        p.presenter || '',
+                        p.timeSlot || '',
+                        p.examiner?.examinerId || 'N/A',
+                        p.examiner?.moduleCode || 'N/A',
+                        new Date(p.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                        p.status
+                    ]);
+                    
+                    // Insert header row
+                    tableBody.unshift(['Title', 'Presenter', 'Time Slot', 'Examiner ID', 'Module Code', 'Date', 'Status']);
+                    
+                    // Define styling for different status values
+                    const getStatusColor = (status) => {
+                        switch(status) {
+                            case 'Accepted': return '#10B981'; // emerald-500
+                            case 'Rejected': return '#F43F5E'; // rose-500
+                            case 'Pending': return '#FBBF24';  // amber-400
+                            default: return '#71717A';         // gray-500
+                        }
+                    };
+                    
+                    // Document definition with light blue theme
+                    const docDefinition = {
+                        pageSize: 'A4',
+                        pageMargins: [40, 60, 40, 60],
+                        background: function() {
+                            return {
+                                canvas: [
+                                    {
+                                        type: 'rect',
+                                        x: 0, y: 0,
+                                        w: 595.28, h: 20,
+                                        color: '#DBEAFE' // bg-blue-100
+                                    }
+                                ]
+                            };
+                        },
+                        content: [
+                            { 
+                                text: 'Presentations Report', 
+                                style: 'header',
+                                alignment: 'center',
+                                margin: [0, 0, 0, 10]
+                            },
+                            { 
+                                text: `Generated on ${new Date().toLocaleDateString('en-GB', { 
+                                    day: '2-digit', month: 'long', year: 'numeric' 
+                                })}`, 
+                                style: 'subheader',
+                                alignment: 'center',
+                                margin: [0, 0, 0, 20]
+                            },
+                            {
+                                table: {
+                                    headerRows: 1,
+                                    widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                                    body: tableBody
+                                },
+                                layout: {
+                                    fillColor: function(rowIndex) {
+                                        return rowIndex === 0 ? '#3B82F6' : (rowIndex % 2 === 0 ? '#EFF6FF' : null);
+                                    },
+                                    hLineWidth: function(i) { return 1; },
+                                    vLineWidth: function(i) { return 1; },
+                                    hLineColor: function(i) { return '#BFDBFE'; },
+                                    vLineColor: function(i) { return '#BFDBFE'; },
+                                    paddingLeft: function() { return 10; },
+                                    paddingRight: function() { return 10; },
+                                    paddingTop: function() { return 8; },
+                                    paddingBottom: function() { return 8; }
+                                }
+                            }
+                        ],
+                        footer: function(currentPage, pageCount) {
+                            return {
+                                text: `Page ${currentPage} of ${pageCount}`,
+                                alignment: 'center',
+                                margin: [0, 10, 0, 0],
+                                fontSize: 8,
+                                color: '#64748B'
+                            };
+                        },
+                        styles: {
+                            header: {
+                                fontSize: 22,
+                                bold: true,
+                                color: '#1E40AF',
+                                decorationStyle: 'double',
+                                decorationColor: '#3B82F6'
+                            },
+                            subheader: {
+                                fontSize: 12,
+                                color: '#64748B'
+                            },
+                            tableHeader: {
+                                bold: true,
+                                fontSize: 11,
+                                color: 'white'
+                            }
+                        },
+                        defaultStyle: {
+                            fontSize: 10
+                        }
+                    };
+                    
+                    // Apply table header styles and color status cells
+                    docDefinition.content[2].table.body.forEach((row, rowIndex) => {
+                        if (rowIndex === 0) {
+                            row.forEach((cell, i) => {
+                                docDefinition.content[2].table.body[0][i] = { 
+                                    text: cell, 
+                                    style: 'tableHeader',
+                                    fillColor: '#3B82F6'
+                                };
+                            });
+                        } else {
+                            const statusCell = row[6];
+                            docDefinition.content[2].table.body[rowIndex][6] = {
+                                text: statusCell,
+                                color: getStatusColor(statusCell)
+                            };
+                        }
+                    });
+                    
+                    // Create and download the PDF
+                    pdfMake.createPdf(docDefinition).download('presentation-report.pdf');
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Report Generated!',
+                        text: 'The PDF report has been downloaded.',
+                        background: '#1e293b',
+                        color: '#e2e8f0',
+                        confirmButtonColor: '#4f46e5',
+                        timer: 2000
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Report Failed',
+                        text: 'An error occurred while generating the report.',
+                        background: '#1e293b',
+                        color: '#e2e8f0',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                    console.error('Error generating report:', error);
+                }
+            }
         });
-    
-        doc.save('presentation-report.pdf');
     };
-    
+
+    const handleNavigation = (path, message) => {
+        Swal.fire({
+            title: 'Confirm Navigation',
+            text: message || 'Are you sure you want to proceed?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#64748b',
+            background: '#1e293b',
+            color: '#e2e8f0',
+            confirmButtonText: 'Yes, proceed!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                navigate(path);
+            }
+        });
+    };
 
     return (
         <div className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700 min-h-screen">
@@ -89,13 +306,13 @@ function Admin() {
                     <h1 className="text-3xl font-extrabold tracking-tight">Admin Dashboard</h1>
                     <div className="flex space-x-4">
                         <button
-                            onClick={() => navigate('/get-reschedule-admin')}
+                            onClick={() => handleNavigation('/get-reschedule-admin', 'You will be redirected to reschedule requests')}
                             className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
                         >
                             Reschedule Requests
                         </button>
                         <button
-                            onClick={() => navigate('/add-examiner')}
+                            onClick={() => handleNavigation('/add-examiner', 'You will be redirected to add examiner page')}
                             className="bg-white text-blue-600 font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-100 transition"
                         >
                             Add Examiner
@@ -138,7 +355,14 @@ function Admin() {
 
             <div className="max-w-7xl mx-auto px-8 py-10">
                 <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700">
-                    {presentations.length === 0 ? (
+                    {isLoading ? (
+                        <div className="p-16 text-center bg-gray-800/90">
+                            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-700/50 mb-4">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-200">Loading presentations...</h3>
+                        </div>
+                    ) : presentations.length === 0 ? (
                         <div className="p-16 text-center bg-gray-800/90">
                             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-700/50 mb-4">
                                 <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

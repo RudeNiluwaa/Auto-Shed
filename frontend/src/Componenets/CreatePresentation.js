@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const CreatePresentation = () => {
     const [title, setTitle] = useState('');
@@ -10,8 +10,7 @@ const CreatePresentation = () => {
     const [date, setDate] = useState('');
     const [examinerId, setExaminerId] = useState('');
     const [moduleCode, setModuleCode] = useState('');
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const formatTo12Hour = (time24) => {
         const [hour, minute] = time24.split(':');
@@ -23,11 +22,18 @@ const CreatePresentation = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccessMessage('');
+        setIsSubmitting(true);
 
         if (!title || !presenter || !startTime || !endTime || !date || !examinerId || !moduleCode) {
-            setError('All fields are required');
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'All fields are required!',
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5'
+            });
+            setIsSubmitting(false);
             return;
         }
 
@@ -40,8 +46,19 @@ const CreatePresentation = () => {
                 { title, presenter, timeSlot: timeSlotFormatted, date, examinerId, moduleCode },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
-            setSuccessMessage('Presentation created successfully');
-            toast.success('Your presentation has been created successfully.');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Presentation created successfully',
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5',
+                timer: 5000,
+                timerProgressBar: true
+            });
+
+            // Reset form
             setTitle('');
             setPresenter('');
             setStartTime('');
@@ -49,43 +66,38 @@ const CreatePresentation = () => {
             setDate('');
             setExaminerId('');
             setModuleCode('');
+
+            window.location.href="http://localhost:3000/home"
+
         } catch (err) {
-            setError(err.response ? err.response.data.msg : 'Server error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.response ? err.response.data.msg : 'Server error',
+                background: '#1e293b',
+                color: '#e2e8f0',
+                confirmButtonColor: '#4f46e5'
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
-            <div className="w-full max-w-md bg-slate-800/40 backdrop-blur-lg rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl">
+            <div className="w-full max-w-4xl bg-slate-800/40 backdrop-blur-lg rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl">
                 <div className="bg-gradient-to-r from-blue-600/80 to-indigo-600/80 p-5">
                     <h2 className="text-2xl font-light text-white tracking-wide text-center">New Presentation</h2>
                 </div>
 
                 <div className="p-8">
-                    {error && (
-                        <div className="mb-6 p-3 bg-rose-900/30 text-rose-300 rounded-lg border border-rose-800/50 flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {error}
-                        </div>
-                    )}
-                    {successMessage && (
-                        <div className="mb-6 p-3 bg-emerald-900/30 text-emerald-300 rounded-lg border border-emerald-800/50 flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {successMessage}
-                        </div>
-                    )}
-
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Presentation Title</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder="Enter title"
@@ -96,7 +108,7 @@ const CreatePresentation = () => {
                                 <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Presenter Name</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
                                     value={presenter}
                                     onChange={(e) => setPresenter(e.target.value)}
                                     placeholder="Enter presenter"
@@ -108,7 +120,7 @@ const CreatePresentation = () => {
                                 <input
                                     type="text"
                                     placeholder="E1234"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
                                     value={examinerId}
                                     onChange={(e) => setExaminerId(e.target.value)}
                                 />
@@ -119,7 +131,7 @@ const CreatePresentation = () => {
                                 <input
                                     type="text"
                                     placeholder="IT1234"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
                                     value={moduleCode}
                                     onChange={(e) => setModuleCode(e.target.value)}
                                 />
@@ -129,41 +141,55 @@ const CreatePresentation = () => {
                                 <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Date</label>
                                 <input
                                     type="date"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
+                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Start Time</label>
-                                <input
-                                    type="time"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
-                                    value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">End Time</label>
-                                <input
-                                    type="time"
-                                    className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200"
-                                    value={endTime}
-                                    onChange={(e) => setEndTime(e.target.value)}
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Start Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
+                                        value={startTime}
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">End Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full bg-slate-800/50 border border-slate-700/70 rounded-lg py-3 px-4 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
+                                        value={endTime}
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg flex items-center justify-center group"
+                            disabled={isSubmitting}
+                            className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-lg flex items-center justify-center group transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:from-blue-500 hover:to-indigo-500'}`}
                         >
-                            <span className="group-hover:translate-x-1 transition-transform duration-300">Create Presentation</span>
-                            <svg className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                            </svg>
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </>
+                            ) : (
+                                <>
+                                    <span className="group-hover:translate-x-1 transition-transform duration-300">Create Presentation</span>
+                                    <svg className="w-5 h-5 ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                    </svg>
+                                </>
+                            )}
                         </button>
                     </form>
                 </div>
