@@ -1,82 +1,18 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
-import toast, { Toaster } from 'react-hot-toast';
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import Swal from 'sweetalert2';
 
-// PDF Styles
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    backgroundColor: '#1E40AF', // Darker blue background
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#FFFFFF', // White color for title
-    fontWeight: 'bold',
-  },
-  table: {
-    display: 'table',
-    width: 'auto',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: '#bfbfbf',
-    backgroundColor: '#FFFFFF', // White background for table
-  },
-  tableRow: {
-    flexDirection: 'row',
-  },
-  tableCol: {
-    width: '20%',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: '#bfbfbf',
-    padding: 5,
-  },
-  tableCell: {
-    fontSize: 10,
-    color: '#1E3A8A', // Dark blue color for text
-  },
-  header: {
-    backgroundColor: '#3B82F6', // Medium blue for header
-    fontWeight: 'bold',
-  },
-});
-
-// PDF Document Component
-const ExaminerPDF = ({ examiners }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.title}>Examiner Details</Text>
-      <View style={styles.table}>
-        <View style={[styles.tableRow, styles.header]}>
-          <View style={styles.tableCol}><Text style={styles.tableCell}>Name</Text></View>
-          <View style={styles.tableCol}><Text style={styles.tableCell}>ID</Text></View>
-          <View style={styles.tableCol}><Text style={styles.tableCell}>Module</Text></View>
-          <View style={styles.tableCol}><Text style={styles.tableCell}>Availability</Text></View>
-          <View style={styles.tableCol}><Text style={styles.tableCell}>Date</Text></View>
-        </View>
-        {examiners.map((examiner, index) => (
-          <View key={index} style={styles.tableRow}>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerName}</Text></View>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.examinerId}</Text></View>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.moduleCode}</Text></View>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.availability}</Text></View>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{examiner.date}</Text></View>
-          </View>
-        ))}
-      </View>
-    </Page>
-  </Document>
-);
+// Register fonts
+pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
 
 export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
   const [filteredExaminers, setFilteredExaminers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('name'); // name, id, module, date
+  const [searchType, setSearchType] = useState('name');
   const [isEditing, setIsEditing] = useState(false);
   const [currentExaminer, setCurrentExaminer] = useState({
     examinerName: '',
@@ -89,12 +25,40 @@ export default function ExaminerList({ role }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8070/examiner/')
-      .then(response => {
+    const fetchExaminers = async () => {
+      try {
+        const result = await Swal.fire({
+          title: 'Loading Examiners',
+          html: 'Please wait while we fetch examiner data...',
+          allowOutsideClick: false,
+          background: '#1e293b',
+          color: '#e2e8f0',
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const response = await axios.get('http://localhost:8070/examiner/');
         setExaminers(response.data);
         setFilteredExaminers(response.data);
-      })
-      .catch(error => console.error("Error fetching data:", error));
+        
+        if (result.isDismissed) {
+          Swal.close();
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to Load',
+          text: 'Could not fetch examiners. Please try again later.',
+          background: '#1e293b',
+          color: '#e2e8f0',
+          confirmButtonColor: '#4f46e5'
+        });
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchExaminers();
   }, []);
 
   useEffect(() => {
@@ -117,38 +81,56 @@ export default function ExaminerList({ role }) {
   }, [searchTerm, searchType, examiners]);
 
   const handleDelete = (examinerId, mongoId) => {
-    axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
-      .then(() => {
-        setExaminers(prev => prev.filter(e => e._id !== mongoId));
-        toast.success('Examiner deleted successfully!', {
-          duration: 3000,
-          position: 'top-center',
-          style: {
-            background: '#4CAF50',
-            color: '#fff',
-            padding: '16px',
-            borderRadius: '8px',
-          },
-        });
-      })
-      .catch(() => {
-        toast.error('Failed to delete examiner', {
-          duration: 3000,
-          position: 'top-center',
-          style: {
-            background: '#f44336',
-            color: '#fff',
-            padding: '16px',
-            borderRadius: '8px',
-          },
-        });
-      });
+    Swal.fire({
+      title: 'Confirm Deletion',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#64748b',
+      background: '#1e293b',
+      color: '#e2e8f0',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
+          .then(() => {
+            setExaminers(prev => prev.filter(e => e._id !== mongoId));
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Examiner has been deleted.',
+              background: '#1e293b',
+              color: '#e2e8f0',
+              confirmButtonColor: '#4f46e5',
+              timer: 2000
+            });
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed to Delete',
+              text: 'Could not delete examiner. Please try again.',
+              background: '#1e293b',
+              color: '#e2e8f0',
+              confirmButtonColor: '#4f46e5'
+            });
+          });
+      }
+    });
   };
 
   const handleUpdate = (examinerId) => {
     const examiner = examiners.find(e => e.examinerId === examinerId);
     if (!examiner) {
-      toast.error('Examiner not found');
+      Swal.fire({
+        icon: 'error',
+        title: 'Examiner Not Found',
+        text: 'The examiner you are trying to edit does not exist.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
     setCurrentExaminer(examiner);
@@ -190,7 +172,14 @@ export default function ExaminerList({ role }) {
       // First check if the examiner still exists
       const checkResponse = await axios.get(`http://localhost:8070/examiner/get/${currentExaminer._id}`);
       if (!checkResponse.data) {
-        toast.error('Examiner no longer exists');
+        Swal.fire({
+          icon: 'error',
+          title: 'Examiner Not Found',
+          text: 'The examiner no longer exists.',
+          background: '#1e293b',
+          color: '#e2e8f0',
+          confirmButtonColor: '#4f46e5'
+        });
         setIsEditing(false);
         return;
       }
@@ -198,18 +187,16 @@ export default function ExaminerList({ role }) {
       const response = await axios.put(`http://localhost:8070/examiner/update/${currentExaminer._id}`, currentExaminer);
       
       if (response.status === 200) {
-        // Update the local state
         setExaminers(prev => prev.map(e => e._id === currentExaminer._id ? currentExaminer : e));
         setIsEditing(false);
-        toast.success('Examiner updated successfully!', {
-          duration: 3000,
-          position: 'top-center',
-          style: {
-            background: '#4CAF50',
-            color: '#fff',
-            padding: '16px',
-            borderRadius: '8px',
-          },
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: 'Examiner has been updated successfully.',
+          background: '#1e293b',
+          color: '#e2e8f0',
+          confirmButtonColor: '#4f46e5',
+          timer: 2000
         });
       }
     } catch (error) {
@@ -217,26 +204,20 @@ export default function ExaminerList({ role }) {
       let errorMessage = 'Failed to update examiner. ';
       
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorMessage += error.response.data?.message || `Server responded with ${error.response.status}`;
       } else if (error.request) {
-        // The request was made but no response was received
         errorMessage += 'No response from server. Please check your connection.';
       } else {
-        // Something happened in setting up the request that triggered an Error
         errorMessage += error.message;
       }
 
-      toast.error(errorMessage, {
-        duration: 4000,
-        position: 'top-center',
-        style: {
-          background: '#f44336',
-          color: '#fff',
-          padding: '16px',
-          borderRadius: '8px',
-        },
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: errorMessage,
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
       });
     }
   };
@@ -246,26 +227,168 @@ export default function ExaminerList({ role }) {
     setCurrentExaminer(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDownloadPDF = async () => {
-    try {
-      const blob = await pdf(<ExaminerPDF examiners={filteredExaminers} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `examiners-report-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+  const generatePDF = () => {
+    if (filteredExaminers.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Data',
+        text: 'There are no examiners to generate a report.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
+      return;
     }
+
+    Swal.fire({
+      title: 'Generating Report',
+      html: 'Please wait while we prepare your PDF...',
+      allowOutsideClick: false,
+      background: '#1e293b',
+      color: '#e2e8f0',
+      didOpen: () => {
+        Swal.showLoading();
+        
+        try {
+          // Format data for the PDF
+          const tableBody = filteredExaminers.map(examiner => [
+            examiner.examinerName || '',
+            examiner.examinerId || '',
+            examiner.moduleCode || '',
+            examiner.availability || '',
+            examiner.date || ''
+          ]);
+          
+          // Insert header row
+          tableBody.unshift(['Name', 'ID', 'Module', 'Availability', 'Date']);
+          
+          // Document definition with blue theme
+          const docDefinition = {
+            pageSize: 'A4',
+            pageMargins: [40, 60, 40, 60],
+            content: [
+              { 
+                text: 'Examiners Report', 
+                style: 'header',
+                alignment: 'center',
+                margin: [0, 0, 0, 10]
+              },
+              { 
+                text: `Generated on ${new Date().toLocaleDateString('en-GB', { 
+                  day: '2-digit', month: 'long', year: 'numeric' 
+                })}`, 
+                style: 'subheader',
+                alignment: 'center',
+                margin: [0, 0, 0, 20]
+              },
+              {
+                table: {
+                  headerRows: 1,
+                  widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+                  body: tableBody
+                },
+                layout: {
+                  fillColor: function(rowIndex) {
+                    return rowIndex === 0 ? '#3B82F6' : (rowIndex % 2 === 0 ? '#EFF6FF' : null);
+                  },
+                  hLineWidth: function(i) { return 1; },
+                  vLineWidth: function(i) { return 1; },
+                  hLineColor: function(i) { return '#BFDBFE'; },
+                  vLineColor: function(i) { return '#BFDBFE'; },
+                  paddingLeft: function() { return 10; },
+                  paddingRight: function() { return 10; },
+                  paddingTop: function() { return 8; },
+                  paddingBottom: function() { return 8; }
+                }
+              }
+            ],
+            footer: function(currentPage, pageCount) {
+              return {
+                text: `Page ${currentPage} of ${pageCount}`,
+                alignment: 'center',
+                margin: [0, 10, 0, 0],
+                fontSize: 8,
+                color: '#64748B'
+              };
+            },
+            styles: {
+              header: {
+                fontSize: 22,
+                bold: true,
+                color: '#1E40AF',
+                decorationStyle: 'double',
+                decorationColor: '#3B82F6'
+              },
+              subheader: {
+                fontSize: 12,
+                color: '#64748B'
+              },
+              tableHeader: {
+                bold: true,
+                fontSize: 11,
+                color: 'white'
+              }
+            },
+            defaultStyle: {
+              fontSize: 10
+            }
+          };
+          
+          // Apply table header styles
+          docDefinition.content[2].table.body[0].forEach((cell, i) => {
+            docDefinition.content[2].table.body[0][i] = { 
+              text: cell, 
+              style: 'tableHeader'
+            };
+          });
+          
+          // Create and download the PDF
+          pdfMake.createPdf(docDefinition).download('examiners-report.pdf');
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Report Generated!',
+            text: 'The PDF report has been downloaded.',
+            background: '#1e293b',
+            color: '#e2e8f0',
+            confirmButtonColor: '#4f46e5',
+            timer: 2000
+          });
+        } catch (error) {
+          console.error('Error generating report:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Report Failed',
+            text: 'An error occurred while generating the report.',
+            background: '#1e293b',
+            color: '#e2e8f0',
+            confirmButtonColor: '#4f46e5'
+          });
+        }
+      }
+    });
+  };
+
+  const handleNavigation = (path, message) => {
+    Swal.fire({
+      title: 'Confirm Navigation',
+      text: message || 'Are you sure you want to proceed?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#64748b',
+      background: '#1e293b',
+      color: '#e2e8f0',
+      confirmButtonText: 'Yes, proceed!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        navigate(path);
+      }
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 text-white p-8 font-sans">
-      <Toaster />
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
 
@@ -289,9 +412,8 @@ export default function ExaminerList({ role }) {
               placeholder={`Search by ${searchType}...`}
               className="w-full md:w-96 bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-white/50"
             />
-            {/* PDF Download Button */}
             <button
-              onClick={handleDownloadPDF}
+              onClick={generatePDF}
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
             >
               Download PDF
@@ -299,7 +421,7 @@ export default function ExaminerList({ role }) {
           </div>
         </div>
 
-        {/* ✅ User View: Cards */}
+        {/* User View: Cards */}
         {role !== 'admin' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExaminers.map((examiner) => (
@@ -316,7 +438,7 @@ export default function ExaminerList({ role }) {
             ))}
           </div>
         ) : (
-          // ✅ Admin View: Table
+          // Admin View: Table
           <div className="overflow-x-auto rounded-xl shadow-2xl">
             <table className="min-w-full bg-white text-black rounded-xl overflow-hidden">
               <thead className="bg-blue-700 text-white">
@@ -356,13 +478,26 @@ export default function ExaminerList({ role }) {
               {["examinerName", "examinerId", "moduleCode", "availability", "date"].map(field => (
                 <div key={field}>
                   <label className="block font-medium capitalize">{field.replace("examiner", "Examiner ")}:</label>
-                  <input
-                    type={field === "date" ? "date" : "text"}
-                    name={field}
-                    value={currentExaminer[field]}
-                    onChange={handleChange}
-                    className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  {field === "availability" ? (
+                    <select
+                      name={field}
+                      value={currentExaminer[field]}
+                      onChange={handleChange}
+                      className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Availability</option>
+                      <option value="Available">Available</option>
+                      <option value="Unavailable">Unavailable</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={field === "date" ? "date" : "text"}
+                      name={field}
+                      value={currentExaminer[field]}
+                      onChange={handleChange}
+                      className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  )}
                   {errors[field] && <p className="text-red-600 text-sm mt-1">{errors[field]}</p>}
                 </div>
               ))}
@@ -378,7 +513,7 @@ export default function ExaminerList({ role }) {
         <div className="mt-12 text-center">
           {role === 'admin' && (
             <button 
-              onClick={() => navigate('/add-examiner')} 
+              onClick={() => handleNavigation('/add-examiner', 'You will be redirected to add examiner page')}
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
             >
               Add Examiner

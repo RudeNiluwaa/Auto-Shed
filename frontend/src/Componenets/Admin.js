@@ -5,6 +5,7 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import Swal from 'sweetalert2';
 
+
 // Register fonts - fix for webpack bundling
 pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
 
@@ -74,7 +75,8 @@ function Admin() {
                 confirmButtonColor: '#4f46e5',
                 timer: 2000
             });
-        } catch (err) {
+        })
+        .catch(err => {
             Swal.fire({
                 icon: 'error',
                 title: 'Update Failed',
@@ -84,7 +86,7 @@ function Admin() {
                 confirmButtonColor: '#4f46e5'
             });
             console.error('Error updating status:', err);
-        }
+        });
     };
 
     const generateReport = () => {
@@ -282,6 +284,33 @@ function Admin() {
         });
     };
 
+    // Filter and search presentations
+    const filteredPresentations = presentations.filter(p => {
+        const matchesSearch = p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              p.presenter?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'All' || p.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const handleLogout = () => {
+        Swal.fire({
+            title: 'Confirm Logout',
+            text: 'Are you sure you want to log out?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#64748b',
+            background: '#1e293b',
+            color: '#e2e8f0',
+            confirmButtonText: 'Yes, log out!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.removeItem('token');
+                navigate('/');
+            }
+        });
+    };
+
     return (
         <div className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700 min-h-screen">
             {/* Navbar */}
@@ -302,12 +331,51 @@ function Admin() {
                         >
                             Add Examiner
                         </button>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                        >
+                            Logout
+                        </button>
                     </div>
                 </div>
             </nav>
 
+            {/* Search and Filter Controls */}
+            <div className="max-w-7xl mx-auto px-8 pt-6">
+                <div className="bg-gray-800 rounded-xl shadow-xl p-4 flex flex-wrap gap-4 mb-6">
+                    <div className="flex-1 min-w-[200px]">
+                        <input
+                            type="text"
+                            placeholder="Search presentations..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <button
+                            onClick={generateReport}
+                            className="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-8 py-10">
+            <div className="max-w-7xl mx-auto px-8 pb-10">
                 <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700">
                     {isLoading ? (
                         <div className="p-16 text-center bg-gray-800/90">
@@ -316,7 +384,7 @@ function Admin() {
                             </div>
                             <h3 className="text-lg font-medium text-gray-200">Loading presentations...</h3>
                         </div>
-                    ) : presentations.length === 0 ? (
+                    ) : filteredPresentations.length === 0 ? (
                         <div className="p-16 text-center bg-gray-800/90">
                             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-700/50 mb-4">
                                 <svg className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -325,12 +393,14 @@ function Admin() {
                             </div>
                             <h3 className="text-lg font-medium text-gray-200">No presentations available</h3>
                             <p className="mt-2 text-sm text-gray-400 max-w-md mx-auto">
-                                Submitted presentations will appear here for review.
+                                {searchTerm || statusFilter !== 'All' ? 
+                                "No presentations match your current filters." :
+                                "Submitted presentations will appear here for review."}
                             </p>
                         </div>
                     ) : (
                         <ul className="divide-y divide-gray-700">
-                            {presentations.map(p => (
+                            {filteredPresentations.map(p => (
                                 <li key={p._id} className="p-8 hover:bg-gray-700/30 transition-colors duration-200">
                                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                                         <div className="flex-1 min-w-0">
@@ -360,18 +430,29 @@ function Admin() {
                                         </div>
 
                                         <div className="flex flex-shrink-0 gap-3">
-                                            <button
-                                                onClick={() => updateStatus(p._id, 'Accepted')}
-                                                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 transition-all duration-150 shadow-lg"
-                                            >
-                                                Approve
-                                            </button>
-                                            <button
-                                                onClick={() => updateStatus(p._id, 'Rejected')}
-                                                className="px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-200 bg-gray-700 hover:bg-gray-600 transition-all duration-150 shadow-lg"
-                                            >
-                                                Decline
-                                            </button>
+                                            {p.status === 'Pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => updateStatus(p._id, 'Accepted')}
+                                                        className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 transition-all duration-150 shadow-lg"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => updateStatus(p._id, 'Rejected')}
+                                                        className="px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-200 bg-gray-700 hover:bg-gray-600 transition-all duration-150 shadow-lg"
+                                                    >
+                                                        Decline
+                                                    </button>
+                                                </>
+                                            )}
+                                            {p.status !== 'Pending' && (
+                                                <div className={`px-4 py-2 text-sm font-medium rounded-md ${
+                                                    p.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                                                }`}>
+                                                    {p.status}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </li>
