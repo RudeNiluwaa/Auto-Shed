@@ -4,6 +4,9 @@ import axios from 'axios';
 
 export default function ExaminerList({ role }) {
   const [examiners, setExaminers] = useState([]);
+  const [filteredExaminers, setFilteredExaminers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('name'); // name, id, module, date
   const [isEditing, setIsEditing] = useState(false);
   const [currentExaminer, setCurrentExaminer] = useState({
     examinerName: '',
@@ -17,9 +20,31 @@ export default function ExaminerList({ role }) {
 
   useEffect(() => {
     axios.get('http://localhost:8070/examiner/')
-      .then(response => setExaminers(response.data))
+      .then(response => {
+        setExaminers(response.data);
+        setFilteredExaminers(response.data);
+      })
       .catch(error => console.error("Error fetching data:", error));
   }, []);
+
+  useEffect(() => {
+    const filtered = examiners.filter(examiner => {
+      const searchValue = searchTerm.toLowerCase();
+      switch(searchType) {
+        case 'name':
+          return examiner.examinerName.toLowerCase().includes(searchValue);
+        case 'id':
+          return examiner.examinerId.toLowerCase().includes(searchValue);
+        case 'module':
+          return examiner.moduleCode.toLowerCase().includes(searchValue);
+        case 'date':
+          return examiner.date.includes(searchValue);
+        default:
+          return true;
+      }
+    });
+    setFilteredExaminers(filtered);
+  }, [searchTerm, searchType, examiners]);
 
   const handleDelete = (examinerId, mongoId) => {
     axios.delete(`http://localhost:8070/examiner/delete/${mongoId}`)
@@ -86,10 +111,33 @@ export default function ExaminerList({ role }) {
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Examiners List</h2>
 
+        {/* Search Bar */}
+        <div className="mb-8 bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="name">Search by Name</option>
+              <option value="id">Search by ID</option>
+              <option value="module">Search by Module</option>
+              <option value="date">Search by Date</option>
+            </select>
+            <input
+              type={searchType === 'date' ? 'date' : 'text'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={`Search by ${searchType}...`}
+              className="w-full md:w-96 bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-white/50"
+            />
+          </div>
+        </div>
+
         {/* ✅ User View: Cards */}
         {role !== 'admin' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {examiners.map((examiner) => (
+            {filteredExaminers.map((examiner) => (
               <div
                 key={examiner._id}
                 className="bg-white text-black rounded-2xl shadow-xl p-6 transition-all hover:shadow-2xl hover:scale-105 duration-300"
@@ -115,7 +163,7 @@ export default function ExaminerList({ role }) {
                 </tr>
               </thead>
               <tbody>
-                {examiners.map(examiner => (
+                {filteredExaminers.map(examiner => (
                   <tr key={examiner.examinerId} className="even:bg-gray-100">
                     <td className="px-4 py-2 border border-gray-300">{examiner.examinerName}</td>
                     <td className="px-4 py-2 border border-gray-300">{examiner.examinerId}</td>
