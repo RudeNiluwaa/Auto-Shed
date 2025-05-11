@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 export default function UpdateReschedule() {
   const [reschedule, setReschedule] = useState({
@@ -80,43 +81,100 @@ export default function UpdateReschedule() {
     
     // Validate all fields
     if (!validateUserId(reschedule.userId)) {
-      alert('User ID must start with IT, CS, CSNE, SE, or DS followed by 8 digits.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid User ID',
+        text: 'User ID must start with IT, CS, CSNE, SE, or DS followed by 8 digits.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     if (!validateExaminerId(reschedule.examinerId)) {
-      alert('Examiner ID must start with E followed by 4 digits.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Examiner ID',
+        text: 'Examiner ID must start with E followed by 4 digits.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     if (!validateModuleCode(reschedule.module_code)) {
-      alert('Module Code must start with IT, CS, CSNE, SE, or DS followed by 4 digits. It should not have consecutive digits.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Module Code',
+        text: 'Module Code must start with IT, CS, CSNE, SE, or DS followed by 4 digits. It should not have consecutive digits.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     if (!validateDate(reschedule.current_date) || !validateDate(reschedule.req_date)) {
-      alert('Both current and requested dates must be today or in the future.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Date',
+        text: 'Both current and requested dates must be today or in the future.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     if (!validateTime(reschedule.current_time, reschedule.req_time, reschedule.current_date, reschedule.req_date)) {
-      alert('Requested time must be after current time if the date is today.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Time',
+        text: 'Requested time must be after current time if the date is today.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     if (!validateVenues(reschedule.current_venue, reschedule.req_venue)) {
-      alert('Current and Requested venues must be different.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Venues',
+        text: 'Current and Requested venues must be different.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
       return;
     }
 
     try {
       // Send updated data to backend
       await axios.put(`http://localhost:8070/reschedule/update/${id}`, reschedule);
-      alert('Reschedule details updated successfully');
+      Swal.fire({
+        icon: 'success',
+        title: 'Reschedule Updated Successfully!',
+        text: 'The reschedule request has been updated.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5',
+        timer: 2000
+      });
       navigate('/get-reschedule-admin');
     } catch (error) {
       console.error('Error updating reschedule:', error);
-      alert('Failed to update reschedule details');
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to Update',
+        text: 'Failed to update reschedule details.',
+        background: '#1e293b',
+        color: '#e2e8f0',
+        confirmButtonColor: '#4f46e5'
+      });
     }
   };
 
@@ -234,22 +292,22 @@ export default function UpdateReschedule() {
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        {/* Submit and Cancel buttons */}
-        <button
-          type="submit"
-          className="w-full p-3 mt-4 text-white bg-blue-500 hover:bg-blue-600 rounded-lg shadow-md"
-        >
-          Update Reschedule
-        </button>
-
-        {/* Cancel button */}
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="w-full p-3 mt-4 text-white bg-gray-500 hover:bg-gray-600 rounded-lg shadow-md"
-        >
-          Cancel
-        </button>
+        {/* Buttons */}
+        <div className="flex justify-between">
+          <button
+            type="submit"
+            className="bg-green-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="bg-red-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );
