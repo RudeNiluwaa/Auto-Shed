@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+
 
 export default function AddRechedule() {
   const [userId, setUserId] = useState('');
@@ -52,75 +54,79 @@ export default function AddRechedule() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Validate all fields
-    if (!validateUserId(userId)) {
-      alert('User ID must start with IT, CS, CSNE, SE, or DS followed by 8 digits.');
-      return;
-    }
+  // Validate all fields
+  if (!validateUserId(userId)) {
+    Swal.fire('Invalid User ID', 'User ID must start with IT, CS, CSNE, SE, or DS followed by 8 digits.', 'error');
+    return;
+  }
 
-    if (!validateExaminerId(examinerId)) {
-      alert('Examiner ID must start with E followed by 4 digits.');
-      return;
-    }
+  if (!validateExaminerId(examinerId)) {
+    Swal.fire('Invalid Examiner ID', 'Examiner ID must start with E followed by 4 digits.', 'error');
+    return;
+  }
 
-    if (!validateModuleCode(module_code)) {
-      alert('Module Code must start with IT, CS, CSNE, SE, or DS followed by 4 digits. It should not have consecutive digits.');
-      return;
-    }
+  if (!validateModuleCode(module_code)) {
+    Swal.fire('Invalid Module Code', 'Must start with IT, CS, CSNE, SE, or DS followed by 4 digits. No repeating digits allowed.', 'error');
+    return;
+  }
 
-    if (!validateDate(current_date) || !validateDate(req_date)) {
-      alert('Both current and requested dates must be today or in the future.');
-      return;
-    }
+  if (!validateDate(current_date) || !validateDate(req_date)) {
+    Swal.fire('Invalid Date', 'Dates must be today or in the future.', 'error');
+    return;
+  }
 
-    if (!validateTime(current_time, req_time, current_date, req_date)) {
-      alert('Requested time must be after current time if the date is today.');
-      return;
-    }
+  if (!validateTime(current_time, req_time, current_date, req_date)) {
+    Swal.fire('Invalid Time', 'Requested time must be after current time if the date is today.', 'error');
+    return;
+  }
 
-    if (!validateVenues(current_venue, req_venue)) {
-      alert('Current and Requested venues must be different.');
-      return;
-    }
+  if (!validateVenues(current_venue, req_venue)) {
+    Swal.fire('Invalid Venue', 'Current and Requested venues must be different.', 'error');
+    return;
+  }
 
-    const newRechedule = {
-      userId,
-      examinerId,
-      module_code,
-      current_date,
-      req_date,
-      current_time,
-      req_time,
-      current_venue,
-      req_venue
-    };
-
-    // Send data to backend
-    axios
-      .post('http://localhost:8070/reschedule/add', newRechedule)
-      .then((response) => {
-        console.log('Success:', response.data);
-        alert('Rechedule details added successfully');
-        navigate('/get-reschedule-user');
-
-        // Reset form
-        setUserId('');
-        setExaminerId('');
-        setModuleCode('');
-        setCurrentDate('');
-        setReqDate('');
-        setCurrentTime('');
-        setReqTime('');
-        setCurrentVenue('');
-        setReqVenue('');
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        alert('Failed to add rechedule details');
-      });
+  const newRechedule = {
+    userId,
+    examinerId,
+    module_code,
+    current_date,
+    req_date,
+    current_time,
+    req_time,
+    current_venue,
+    req_venue
   };
+
+  axios
+    .post('http://localhost:8070/reschedule/add', newRechedule)
+    .then((response) => {
+      Swal.fire({
+        title: 'Success!',
+        text: 'Reschedule details added successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        navigate('/get-reschedule-user');
+      });
+
+      // Reset form
+      setUserId('');
+      setExaminerId('');
+      setModuleCode('');
+      setCurrentDate('');
+      setReqDate('');
+      setCurrentTime('');
+      setReqTime('');
+      setCurrentVenue('');
+      setReqVenue('');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      Swal.fire('Error', 'Failed to add reschedule details.', 'error');
+    });
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-cover bg-center" 
