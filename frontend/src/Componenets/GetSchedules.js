@@ -266,9 +266,11 @@ export default function GetSchedules({ role }) {
             Download PDF
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 bg-white/60 shadow-md backdrop-blur-md">
-            <thead className="bg-gray-300/10 text-white font-bold">
+       <div className="overflow-x-auto">
+  <table className="min-w-[1500px] w-full border-collapse border border-gray-300 bg-white/60 shadow-md backdrop-blur-md text-lg">
+
+            <thead className="bg-gray-300/10 text-white font-bold text-xl">
+
               <tr>
                 <th className="border border-gray-400 p-2">User ID</th>
                 <th className="border border-gray-400 p-2">Examiner ID</th>
@@ -282,7 +284,8 @@ export default function GetSchedules({ role }) {
                 {role === "admin" && <th className="border border-gray-400 p-2">Actions</th>}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-lg">
+
               {filteredReschedules.map((reschedule) => (
                 <tr key={reschedule._id} className="text-center border-b border-gray-300 bg-white/10 hover:bg-white/20 text-white font-bold transition">
                   <td className="border border-gray-300 p-2">{reschedule.userId}</td>
