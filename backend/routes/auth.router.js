@@ -320,7 +320,7 @@ router.post('/create', verifyToken, async (req, res) => {
         const { title, presenter, timeSlot, date, examinerId } = req.body; 
         const userId = req.userId;
 
-        const examiner = await Examiner.findById(examinerId);
+        const examiner = await Examiner.findOne({examinerId});
         if (!examiner) {
             return res.status(404).json({ msg: 'Examiner not found' });
         }
