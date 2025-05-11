@@ -129,27 +129,29 @@ export default function AddRechedule() {
 };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-cover bg-center" 
-    style={{ backgroundImage: 'url(/images/work1.jpg)' }}>
-     <form
+     <div className="flex justify-center items-start min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 py-6">
+       
+    <form
   onSubmit={handleSubmit}
-  className="w-full max-w-md p-6 bg-white bg-opacity-50 shadow-md rounded-lg border border-gray-300"
+  className="w-full max-w-2xl p-6 bg-white bg-opacity-50 shadow-md rounded-lg border border-gray-300"
 >
-  <h2 className="text-center text-2xl font-semibold text-gray-800 mb-6">Add Reschedule Details</h2>
+
+  <h2 className="text-4xl font-extrabold text-center tracking-wide mb-10 uppercase text-white drop-shadow">Add Reschedule Details</h2>
 
   {/* Input fields */}
-  <label htmlFor="userId" className="block text-sm font-medium text-gray-700">User ID:</label>
-  <input
-    type="text"
-    id="userId"
-    name="userId"
-    value={userId}
-    onChange={(e) => setUserId(e.target.value)}
-    required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-  />
+ <label htmlFor="userId" className="block text-lg font-extrabold text-gray-800 mb-1">User ID:</label>
+<input
+  type="text"
+  id="userId"
+  name="userId"
+  value={userId}
+  onChange={(e) => setUserId(e.target.value)}
+  required
+  className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
 
-  <label htmlFor="examinerId" className="block text-sm font-medium text-gray-700">Examiner ID:</label>
+
+  <label htmlFor="examinerId" className="block text-lg font-extrabold text-gray-800 mb-1">Examiner ID:</label>
   <input
     type="text"
     id="examinerId"
@@ -157,10 +159,10 @@ export default function AddRechedule() {
     value={examinerId}
     onChange={(e) => setExaminerId(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="moduleCode" className="block text-sm font-medium text-gray-700">Module Code:</label>
+  <label htmlFor="moduleCode" className="block text-lg font-extrabold text-gray-800 mb-1">Module Code:</label>
   <input
     type="text"
     id="moduleCode"
@@ -168,10 +170,10 @@ export default function AddRechedule() {
     value={module_code}
     onChange={(e) => setModuleCode(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="currentDate" className="block text-sm font-medium text-gray-700">Current Date:</label>
+  <label htmlFor="currentDate" className="block text-lg font-extrabold text-gray-800 mb-1">Current Date:</label>
   <input
     type="date"
     id="currentDate"
@@ -179,10 +181,10 @@ export default function AddRechedule() {
     value={current_date}
     onChange={(e) => setCurrentDate(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="reqDate" className="block text-sm font-medium text-gray-700">Requested Date:</label>
+  <label htmlFor="reqDate" className="block text-lg font-extrabold text-gray-800 mb-1">Requested Date:</label>
   <input
     type="date"
     id="reqDate"
@@ -190,10 +192,10 @@ export default function AddRechedule() {
     value={req_date}
     onChange={(e) => setReqDate(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="currentTime" className="block text-sm font-medium text-gray-700">Current Time:</label>
+  <label htmlFor="currentTime" className="block text-lg font-extrabold text-gray-800 mb-1">Current Time:</label>
   <input
     type="time"
     id="currentTime"
@@ -201,10 +203,10 @@ export default function AddRechedule() {
     value={current_time}
     onChange={(e) => setCurrentTime(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="reqTime" className="block text-sm font-medium text-gray-700">Requested Time:</label>
+  <label htmlFor="reqTime" className="block text-lg font-extrabold text-gray-800 mb-1">Requested Time:</label>
   <input
     type="time"
     id="reqTime"
@@ -212,10 +214,10 @@ export default function AddRechedule() {
     value={req_time}
     onChange={(e) => setReqTime(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="currentVenue" className="block text-sm font-medium text-gray-700">Current Venue:</label>
+  <label htmlFor="currentVenue" className="bblock text-lg font-extrabold text-gray-800 mb-1">Current Venue:</label>
   <input
     type="text"
     id="currentVenue"
@@ -223,10 +225,10 @@ export default function AddRechedule() {
     value={current_venue}
     onChange={(e) => setCurrentVenue(e.target.value)}
     required
-    className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
-  <label htmlFor="reqVenue" className="block text-sm font-medium text-gray-700">Requested Venue:</label>
+  <label htmlFor="reqVenue" className="block text-lg font-extrabold text-gray-800 mb-1">Requested Venue:</label>
   <input
     type="text"
     id="reqVenue"
@@ -234,12 +236,12 @@ export default function AddRechedule() {
     value={req_venue}
     onChange={(e) => setReqVenue(e.target.value)}
     required
-    className="w-full p-3 mb-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="w-full p-4 text-lg mb-6 border border-gray-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
   <button
     type="submit"
-    className="w-full p-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+    className=" text-2xl w-full p-3 bg-green-500 text-white rounded-lg font-extrabold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
   >
     Submit
   </button>
@@ -247,7 +249,7 @@ export default function AddRechedule() {
   <button
     type="button"
     onClick={() => navigate('/get-reschedule-user')}
-    className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className="text-2xl w-full p-3 mt-4 bg-blue-500 text-white rounded-lg font-extrabold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
   >
     All Reschedules
   </button>
